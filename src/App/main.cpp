@@ -7,7 +7,9 @@
 
 #include "../FastNMS/FastNMS.hpp"
 #include "../FasterNMS/CoverTree.hpp"
+#include "../FasterNMS/FasterNMS.hpp"
 #include "../GreedyNMS/GreedyNMS.hpp"
+
 int main(int argc, char** argv) {
     Box<int, double, double> a({{0, 1}, {1, 0}}, 0.7, 0);
     Box<int, double, double> b({{0, 2}, {2, 0}}, 0.9, 1);
@@ -25,7 +27,7 @@ int main(int argc, char** argv) {
     //     std::endl;
     // }
 
-    auto keep = fastNMS<int, double, double>({a, b}, 0.1);
+    auto keep = fasterNMS<int, double, double>({a, b}, 0.1);
 
     for (auto p : keep) {
         std::cerr << p << std::endl;

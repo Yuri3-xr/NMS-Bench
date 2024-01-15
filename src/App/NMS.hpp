@@ -111,7 +111,7 @@ class Box {
         return static_cast<S>(inter) / (area1 + area2 - inter);
     }
 
-    M distance(const Box<T, M, S> &other) const {
+    T distance(const Box<T, M, S> &other) const {
         auto p = (this->rect).midPoint - other.rect.midPoint;
         return static_cast<M>(sqrt(p.x * p.x + p.y * p.y));
     }
