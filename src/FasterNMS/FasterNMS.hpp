@@ -9,7 +9,7 @@
 #include "../App/NMS.hpp"
 #include "CoverTree.hpp"
 
-constexpr unsigned int K = 10;
+constexpr unsigned int K = 3;
 
 template <class T, class M, class S>
 auto fasterNMS(const std::vector<Box<T, M, S>>& boxes, const S& iouThreshold)
@@ -32,19 +32,25 @@ auto fasterNMS(const std::vector<Box<T, M, S>>& boxes, const S& iouThreshold)
     std::vector<uint8_t> suppressed(
         size, 0);  // Boxes which have already been suppressed
 
-    CoverTree<Box<T, M, S>> coverTree;
+    CoverTree<Box<T, M, S>> coverTree(dets);
     keep.reserve(size);
 
     for (uint32_t i = 0; i < size; i++) {
+        if (suppressed[dets[i].id]) continue;
         auto check = coverTree.kNearestNeighbors(dets[i], K);
 
         for (const auto& p : check) {
-            if (dets[i].IoU(p) > iouThreshold) suppressed[i] = 1;
+            if (dets[i].IoU(p) > iouThreshold && dets[i].score < p.score) {
+                suppressed[dets[i].id] = 1;
+                break;
+            }
+            if (dets[i].IoU(p) > iouThreshold && dets[i].score > p.score) {
+                suppressed[p.id] = 1;
+                break;
+            }
         }
 
-        if (not suppressed[i]) keep.emplace_back(dets[i].id);
-
-        coverTree.insert(dets[i]);
+        if (not suppressed[dets[i].id]) keep.emplace_back(dets[i].id);
     }
 
     return keep;

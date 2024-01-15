@@ -4,7 +4,7 @@ CFLAGS := -std=c++20 -Wall -ffast-math -funroll-loops
 SRCDIR := src
 BUILDDIR := build
 OUTPUTDIR := build/output
-TARGET := $(OUTPUTDIR)/GreedyNMS
+TARGET := $(OUTPUTDIR)/main
 
 # 查找所有.cpp文件
 SOURCES := $(wildcard $(SRCDIR)/**/*.cpp)
