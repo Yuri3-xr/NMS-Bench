@@ -42,7 +42,7 @@ class Point {
     }
 };
 
-template <class T>
+template <class T, class M>
 class Rect {
    public:
     Point<T> lt, rb;
@@ -50,12 +50,20 @@ class Rect {
         lt: left-top point
         rb: right-bottom point
     */
-    Point<T> midPoint;
+    Point<M> midPoint;
 
-    constexpr Rect(Point<T> _lt, Point<T> _rb) : lt(_lt), rb(_rb) {
-        midPoint = Point((lt + rb) / 2);
+    constexpr Rect(Point<T> _lt, Point<T> _rb)
+        : lt(_lt),
+          rb(_rb),
+          midPoint(M(lt.x + rb.x) / M(2), M(lt.y + rb.y) / M(2)){};
+
+    Rect<T, M> operator=(const Rect<T, M> &other) {
+        this->lt = other.lt;
+        this->rb = other.rb;
+        this->midPoint = other.midPoint;
+
+        return (*this);
     }
-
     constexpr auto area() const noexcept -> T {
         auto width = std::max(static_cast<T>(0), rb.x - lt.x);
         auto height = std::max(static_cast<T>(0), lt.y - rb.y);
@@ -64,29 +72,47 @@ class Rect {
     }
 };
 
-template <class T, class S>
+/*
+    T: lt/ rb point type
+    M: midPoint type
+    S: score type
+*/
+
+template <class T, class M, class S>
 class Box {
    public:
-    Rect<T> rect;
+    Rect<T, M> rect;
     S score;
-    uint32_t id;
-    constexpr Box(Rect<T> _rect, S _score, uint32_t _id)
+    uint32_t id = -1;
+    constexpr Box(Rect<T, M> _rect, S _score, uint32_t _id)
         : rect(_rect), score(_score), id(_id){};
 
     friend bool operator<(const auto &_cmpa, const auto &_cmpb) {
         return _cmpa.score > _cmpb.score;
     }
+    bool operator==(const Box &p) const { return id == p.id; }
+    Box<T, M, S> operator=(const Box<T, M, S> &other) {
+        this->rect = other.rect;
+        this->score = other.score;
+        this->id = other.id;
 
-    auto IoU(const Box<T, S> &other) -> S {
+        return (*this);
+    }
+    auto IoU(const Box<T, M, S> &other) -> S {
         auto inter1 = Point(std::max(rect.lt.x, other.rect.lt.x),
                             std::min(rect.lt.y, other.rect.lt.y));
         auto inter2 = Point(std::min(rect.rb.x, other.rect.rb.x),
                             std::max(rect.rb.y, other.rect.rb.y));
 
-        auto inter = Rect(inter1, inter2).area();
+        auto inter = Rect<T, M>(inter1, inter2).area();
         auto area1 = this->rect.area();
         auto area2 = other.rect.area();
 
         return static_cast<S>(inter) / (area1 + area2 - inter);
+    }
+
+    M distance(const Box<T, M, S> &other) const {
+        auto p = (this->rect).midPoint - other.rect.midPoint;
+        return static_cast<M>(sqrt(p.x * p.x + p.y * p.y));
     }
 };

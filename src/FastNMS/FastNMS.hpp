@@ -2,13 +2,14 @@
 
 #include <algorithm>
 #include <cinttypes>
+#include <cmath>
 #include <cstdint>
 #include <vector>
 
 #include "../App/NMS.hpp"
 
-template <class T, class S>
-auto fastNMS(const std::vector<Box<T, S>>& boxes, const S& iouThreshold)
+template <class T, class M, class S>
+auto fastNMS(const std::vector<Box<T, M, S>>& boxes, const S& iouThreshold)
     -> std::vector<std::uint32_t> {
     auto size = std::size(boxes);
 
@@ -31,7 +32,7 @@ auto fastNMS(const std::vector<Box<T, S>>& boxes, const S& iouThreshold)
     keep.reserve(size);
 
     for (uint32_t i = 0; i < size; i++) {
-        keep.emplace_back(dets[i].id);
+        if (not suppressed[i]) keep.emplace_back(dets[i].id);
 
         for (uint32_t j = i + 1; j < size; j++) {
             if (suppressed[j] == 1) continue;

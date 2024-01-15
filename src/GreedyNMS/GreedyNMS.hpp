@@ -2,13 +2,14 @@
 
 #include <algorithm>
 #include <cinttypes>
+#include <cmath>
 #include <cstdint>
 #include <vector>
 
 #include "../App/NMS.hpp"
 
-template <class T, class S>
-auto greedyNMS(const std::vector<Box<T, S>>& boxes, const S& iouThreshold)
+template <class T, class M, class S>
+auto greedyNMS(const std::vector<Box<T, M, S>>& boxes, const S& iouThreshold)
     -> std::vector<std::uint32_t> {
     auto size = std::size(boxes);
 
