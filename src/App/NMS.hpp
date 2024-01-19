@@ -49,6 +49,14 @@ class Rect {
     /*
         lt: left-top point
         rb: right-bottom point
+        Pay attention to the orignal point
+                   rb
+        |----------|
+        |          |
+        |          |
+        |          |
+        |----------|
+        lt
     */
     Point<M> midPoint;
 
@@ -100,9 +108,9 @@ class Box {
     }
     auto IoU(const Box<T, M, S> &other) -> S {
         auto inter1 = Point(std::max(rect.lt.x, other.rect.lt.x),
-                            std::min(rect.lt.y, other.rect.lt.y));
+                            std::max(rect.lt.y, other.rect.lt.y));
         auto inter2 = Point(std::min(rect.rb.x, other.rect.rb.x),
-                            std::max(rect.rb.y, other.rect.rb.y));
+                            std::min(rect.rb.y, other.rect.rb.y));
 
         auto inter = Rect<T, M>(inter1, inter2).area();
         auto area1 = this->rect.area();
@@ -113,6 +121,7 @@ class Box {
 
     T distance(const Box<T, M, S> &other) const {
         auto p = (this->rect).midPoint - other.rect.midPoint;
-        return static_cast<M>(sqrt(p.x * p.x + p.y * p.y));
+        // return static_cast<M>(sqrt(p.x * p.x + p.y * p.y));
+        return static_cast<M>(abs(p.x) + abs(p.y));
     }
 };

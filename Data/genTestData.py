@@ -4,7 +4,7 @@ def generate_random_rectangle():
     left_top_x = random.randint(0, 1000)
     left_top_y = random.randint(0, 1000)
     right_bottom_x = random.randint(left_top_x, 1000)
-    right_bottom_y = random.randint(0, left_top_y)
+    right_bottom_y = random.randint(left_top_y, 1000)
     decimal_value = round(random.uniform(0, 1), 2)
     
     return left_top_x, left_top_y, right_bottom_x, right_bottom_y, decimal_value

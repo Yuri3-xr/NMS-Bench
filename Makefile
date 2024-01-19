@@ -1,5 +1,5 @@
 CC := g++-13
-CFLAGS := -std=c++20 -Wall -ffast-math -funroll-loops
+CFLAGS := -std=c++20 -Wall -ffast-math -funroll-loops -O3
 
 SRCDIR := src
 BUILDDIR := build

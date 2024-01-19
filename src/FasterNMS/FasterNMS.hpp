@@ -9,7 +9,7 @@
 #include "../App/NMS.hpp"
 #include "CoverTree.hpp"
 
-constexpr unsigned int K = 3;
+constexpr unsigned int K = 1;
 
 template <class T, class M, class S>
 auto fasterNMS(const std::vector<Box<T, M, S>>& boxes, const S& iouThreshold)
@@ -40,13 +40,12 @@ auto fasterNMS(const std::vector<Box<T, M, S>>& boxes, const S& iouThreshold)
         auto check = coverTree.kNearestNeighbors(dets[i], K);
 
         for (const auto& p : check) {
-            if (dets[i].IoU(p) > iouThreshold && dets[i].score < p.score) {
+            auto iou = dets[i].IoU(p);
+            if (iou > iouThreshold && dets[i].score < p.score) {
                 suppressed[dets[i].id] = 1;
-                break;
             }
-            if (dets[i].IoU(p) > iouThreshold && dets[i].score > p.score) {
+            if (iou > iouThreshold && dets[i].score > p.score) {
                 suppressed[p.id] = 1;
-                break;
             }
         }
 

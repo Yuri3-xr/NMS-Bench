@@ -15,8 +15,9 @@
 #include "../util/time.hpp"
 #include "IO.hpp"
 
-std::vector<Box<int32_t, double, double>> boxes;
+std::vector<Box<int32_t, int32_t, double>> boxes;
 std::vector<std::uint32_t> keep;
+
 constexpr double iouThreshold = 0.5;
 int main(int argc, char** argv) {
     /*
@@ -40,7 +41,7 @@ int main(int argc, char** argv) {
                               std::ios::trunc);
     std::string method(argv[3]);
 
-    input<int32_t, double, double>(boxes, inFile);
+    input<int32_t, int32_t, double>(boxes, inFile);
 
     Timer timer;
     timer.reset();
