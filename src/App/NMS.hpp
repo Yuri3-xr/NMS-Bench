@@ -55,7 +55,7 @@ class Rect {
         |          |
         |          |
         |          |
-        |----------|
+©        |----------|
         lt
     */
     Point<M> midPoint;
@@ -121,7 +121,7 @@ class Box {
 
     T distance(const Box<T, M, S> &other) const {
         auto p = (this->rect).midPoint - other.rect.midPoint;
-        // return static_cast<M>(sqrt(p.x * p.x + p.y * p.y));
-        return static_cast<M>(abs(p.x) + abs(p.y));
+        return static_cast<M>(sqrt(p.x * p.x + p.y * p.y));
+        // return static_cast<M>(abs(p.x) + abs(p.y));
     }
 };
