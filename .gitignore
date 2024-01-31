@@ -38,9 +38,6 @@
 build/
 
 # Data
-data/nms_yolov8n/
-data/nms_yolov8n_output_FasterNMS/
-data/nms_yolov8n_output_FastNMS/
-data/nms_yolov8n_output_GreedyNMS/
+data/
 
 

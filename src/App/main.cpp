@@ -3,11 +3,11 @@
 #include <cstdio>
 #include <cstring>
 #include <filesystem>
-#include <format>
 #include <fstream>
 #include <iostream>
 #include <vector>
 
+#include "../DNMS/DNMS.hpp"
 #include "../FastNMS/FastNMS.hpp"
 #include "../FasterNMS/CoverTree.hpp"
 #include "../FasterNMS/FasterNMS.hpp"
@@ -18,7 +18,7 @@
 std::vector<Box<double, double, double>> boxes;
 std::vector<std::uint32_t> keep;
 
-constexpr double iouThreshold = 0.5;
+constexpr double iouThreshold = 0.7;
 int main(int argc, char** argv) {
     /*
         argc = 4
@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
 
     if (argc != 4) {
         std::cerr << "  argv[1] -- input dict \nargv[2] -- output dict\n "
-                     "argv[3] -- method(GreedyNMS, FastNMS, FasterNMS)"
+                     "argv[3] -- method(GreedyNMS, FastNMS, FasterNMS, DNMS)"
                   << std::endl;
 
         exit(-1);
@@ -51,6 +51,8 @@ int main(int argc, char** argv) {
 
     Timer timer;
     timer.reset();
+
+    std::uint64_t sumTime = 0;
     std::filesystem::directory_iterator inList(inPath);
 
     for (const auto& file : inList) {
@@ -61,7 +63,7 @@ int main(int argc, char** argv) {
         std::string outFileName =
             std::string(argv[2]) + std::string(file.path().filename());
 
-        std::cerr << inFileName << " " << outFileName << std::endl;
+        // std::cerr << inFileName << " " << outFileName << std::endl;
 
         inFile.open(inFileName,
                     std::ios::in | std::ios::out | std::ios::binary);
@@ -71,25 +73,41 @@ int main(int argc, char** argv) {
         boxes.clear();
         input<double, double, double>(boxes, inFile);
 
+        timer.reset();
+
         if (method == "GreedyNMS") {
             keep = greedyNMS(boxes, iouThreshold);
+        } else if (method == "FastNMS") {
+            keep = fastNMS(boxes, iouThreshold);
+        } else if (method == "FasterNMS") {
+            keep = fasterNMS(boxes, iouThreshold);
+        } else if (method == "DNMS") {
+            keep = dNMS(boxes, iouThreshold);
         } else {
-            if (method == "FastNMS") {
-                keep = fastNMS(boxes, iouThreshold);
-            } else if (method == "FasterNMS") {
-                keep = fasterNMS(boxes, iouThreshold);
-            } else {
-                std::cerr << "No such method!" << std::endl;
-                exit(-1);
-            }
+            std::cerr << "No such method!" << std::endl;
+            exit(-1);
         }
 
+        sumTime += timer.elapsed();
+        if (keep.size() <= 2) {
+            std::cerr << inFileName << std::endl;
+
+            if (keep.size() == 2) {
+                auto p = boxes[keep[0]];
+                for (int k = 0; k < std::size(boxes); k++) {
+                    if (k != keep[0]) {
+                        std::cerr << p.IoU(boxes[k]) << '\n';
+                    }
+                }
+                std::cerr << '\n';
+            }
+        }
         output(keep, outFile);
 
         inFile.close();
         outFile.close();
     }
 
-    std::cerr << std::format("Time is {}\n", timer.elapsed());
+    std::cerr << "Time is " << sumTime << std::endl;
     return 0;
 }
