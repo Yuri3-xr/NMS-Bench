@@ -73,8 +73,10 @@ class Rect {
         return (*this);
     }
     constexpr auto area() const noexcept -> T {
+    
         auto width = std::max(static_cast<T>(0), rb.x - lt.x);
-        auto height = std::max(static_cast<T>(0), lt.y - rb.y);
+        auto height = std::max(static_cast<T>(0), rb.y - lt.y);
+
 
         return width * height;
     }
@@ -95,7 +97,7 @@ class Box {
     constexpr Box(Rect<T, M> _rect, S _score, uint32_t _id)
         : rect(_rect), score(_score), id(_id){};
 
-    friend bool operator<(const auto &_cmpa, const auto &_cmpb) {
+    friend bool operator<(const Box<T, M, S> &_cmpa, const Box<T, M, S> &_cmpb) {
         return _cmpa.score > _cmpb.score;
     }
     bool operator==(const Box &p) const { return id == p.id; }
@@ -125,3 +127,23 @@ class Box {
         // return static_cast<M>(abs(p.x) + abs(p.y));
     }
 };
+
+template<class S>
+auto getIoUhreshold(const S& val, uint32_t& deg, const S& iouThreshold) -> S {
+    /*
+        get current iouThreshold by val and degnums
+    */
+    if (deg == 0) 
+        return iouThreshold;
+         
+    S diff = val / static_cast<S>(deg);
+
+    S leftBound = std::max<S>(iouThreshold - 0.3, 0);
+    S rightBound = std::min<S>(iouThreshold + 0.3, 1); 
+
+    diff = leftBound + (rightBound - leftBound) * diff;
+
+    if (deg > 100) deg += 0.05;
+    if (deg < 5) deg -= 0.05;
+    return diff;
+} 
