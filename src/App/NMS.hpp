@@ -127,4 +127,3 @@ class Box {
         // return static_cast<M>(abs(p.x) + abs(p.y));
     }
 };
-
