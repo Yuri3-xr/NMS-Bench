@@ -11,6 +11,7 @@
 #include "../FastNMS/FastNMS.hpp"
 #include "../FasterNMS/CoverTree.hpp"
 #include "../FasterNMS/FasterNMS.hpp"
+#include "../SoftNMS/SoftNMS.hpp"
 #include "../GreedyNMS/GreedyNMS.hpp"
 #include "../Utils/time.hpp"
 #include "IO.hpp"
@@ -20,6 +21,9 @@ std::vector<std::uint32_t> keep;
 
 constexpr double iouThreshold = 0.7;
 int main(int argc, char** argv) {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+
     /*
         argc = 4
         argv[1] -- input path
@@ -40,7 +44,7 @@ int main(int argc, char** argv) {
     std::string method(argv[3]);
 
     if (not std::filesystem::exists(inPath)) {
-        std::cerr << "No such input dict!" << std::endl;
+        std::cerr << "No such input dictionary!" << std::endl;
 
         exit(-1);
     }
@@ -83,31 +87,33 @@ int main(int argc, char** argv) {
             keep = fasterNMS(boxes, iouThreshold);
         } else if (method == "DNMS") {
             keep = dNMS(boxes, iouThreshold);
+        } else if (method == "SoftNMS") {
+            keep = softNMS(boxes, iouThreshold, 0.5, 0.02, 1);
         } else {
             std::cerr << "No such method!" << std::endl;
             exit(-1);
         }
 
         sumTime += timer.elapsed();
-        if (keep.size() <= 2) {
-            std::cerr << inFileName << std::endl;
+        // if (keep.size() <= 2) {
+        //     std::cerr << inFileName << std::endl;
 
-            if (keep.size() == 2) {
-                auto p = boxes[keep[0]];
-                for (int k = 0; k < std::size(boxes); k++) {
-                    if (k != keep[0]) {
-                        std::cerr << p.IoU(boxes[k]) << '\n';
-                    }
-                }
-                std::cerr << '\n';
-            }
-        }
+        //     if (keep.size() == 2) {
+        //         auto p = boxes[keep[0]];
+        //         for (uint32_t k = 0; k < std::size(boxes); k++) {
+        //             if (k != keep[0]) {
+        //                 std::cerr << p.IoU(boxes[k]) << '\n';
+        //             }
+        //         }
+        //         std::cerr << '\n';
+        //     }
+        // }
         output(keep, outFile);
 
         inFile.close();
         outFile.close();
     }
 
-    std::cerr << "Time is " << sumTime << std::endl;
+    std::cerr << method << " process time is " << sumTime << "ms" <<std::endl;
     return 0;
 }

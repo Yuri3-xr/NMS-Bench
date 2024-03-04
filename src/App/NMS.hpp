@@ -128,22 +128,3 @@ class Box {
     }
 };
 
-template<class S>
-auto getIoUhreshold(const S& val, uint32_t& deg, const S& iouThreshold) -> S {
-    /*
-        get current iouThreshold by val and degnums
-    */
-    if (deg == 0) 
-        return iouThreshold;
-         
-    S diff = val / static_cast<S>(deg);
-
-    S leftBound = std::max<S>(iouThreshold - 0.3, 0);
-    S rightBound = std::min<S>(iouThreshold + 0.3, 1); 
-
-    diff = leftBound + (rightBound - leftBound) * diff;
-
-    if (deg > 100) deg += 0.05;
-    if (deg < 5) deg -= 0.05;
-    return diff;
-} 

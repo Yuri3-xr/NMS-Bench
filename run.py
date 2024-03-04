@@ -3,7 +3,8 @@ import pexpect
 
 method = str(input())
 
-input_file = 'data/nms_yolov8m/'
+input_file = 'data/nms_yolov8m_gpu/'
+# gpu / cpu dataset is a little different, pay attention
 output_file = 'data/nms_yolov8m_output' + '_' + method + '/' 
 
 
