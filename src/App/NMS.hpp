@@ -55,7 +55,7 @@ class Rect {
         |          |
         |          |
         |          |
-©        |----------|
+        |----------|
         lt
     */
     Point<M> midPoint;
