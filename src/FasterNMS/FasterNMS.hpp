@@ -15,7 +15,7 @@ auto fasterNMS(const std::vector<Box<T, M, S>>& boxes, const S& iouThreshold)
     -> std::vector<std::uint32_t> {
     auto size = std::size(boxes);
 
-    const unsigned int K = 3;
+    const unsigned int K = 10;  // dynamic rate
 
     if ((int)size == 0) {
         // empty case
@@ -33,60 +33,6 @@ auto fasterNMS(const std::vector<Box<T, M, S>>& boxes, const S& iouThreshold)
     std::vector<uint8_t> suppressed(
         size, 0);  // Boxes which have already been suppressed
 
-    /*
-        Method1: dynamic insert
-        map: coco yolov8_n 37.2
-    */
-
-    // CoverTree<Box<T, M, S>> coverTree;
-    // keep.reserve(size);
-
-    // for (uint32_t i = 0; i < size; i++) {
-    //     auto check = coverTree.kNearestNeighbors(dets[i], K);
-
-    //     for (const auto& p : check) {
-    //         if (dets[i].id == p.id) continue;
-    //         auto iou = dets[i].IoU(p);
-    //         if (iou > iouThreshold && dets[i].score < p.score) {
-    //             suppressed[dets[i].id] = 1;
-    //         }
-    //     }
-
-    //     coverTree.insert(dets[i]);
-    //     if (not suppressed[dets[i].id]) {
-    //         keep.emplace_back(dets[i].id);
-    //     }
-    // }
-
-    /*
-        Method2: build at first, maybe get awful result
-        map: coco yolov8_n 20.4
-    */
-
-    // CoverTree<Box<T, M, S>> coverTree(dets);
-    // keep.reserve(size);
-
-    // for (uint32_t i = 0; i < size; i++) {
-    //     auto check = coverTree.kNearestNeighbors(dets[i], K);
-
-    //     for (const auto& p : check) {
-    //         if (dets[i].id == p.id) continue;
-    //         auto iou = dets[i].IoU(p);
-    //         if (iou > iouThreshold && dets[i].score < p.score) {
-    //               suppressed[dets[i].id] = 1;
-    //         }
-    //     }
-
-    //     if(not suppressed[dets[i].id]) {
-    //         keep.emplace_back(dets[i].id);
-    //     }
-    // }
-
-    /*
-        Method 3: Just use set to store x + y
-        lower bound prev / next / this to check
-    */
-
     auto cmp = [&](const Box<T, M, S>& _cmpa, const Box<T, M, S>& _cmpb) {
         return _cmpa.rect.midPoint.x + _cmpa.rect.midPoint.y <
                _cmpb.rect.midPoint.x + _cmpb.rect.midPoint.y;
@@ -98,39 +44,57 @@ auto fasterNMS(const std::vector<Box<T, M, S>>& boxes, const S& iouThreshold)
 
     for (uint32_t i = 1; i < size; i++) {
         auto it = st.lower_bound(dets[i]);
-        auto p = *(it);
-        auto iou = dets[i].IoU(p);
-        if (iou > iouThreshold && dets[i].score < p.score) {
-            suppressed[dets[i].id] = 1;
-            st.insert(dets[i]);
-            continue;
-        }
 
-        if (std::next(it) != std::end(st)) {
-            auto p = *(std::next(it));
-            auto iou = dets[i].IoU(p);
-            if (iou > iouThreshold && dets[i].score < p.score) {
-                suppressed[dets[i].id] = 1;
-                st.insert(dets[i]);
-                continue;
+        auto rightSolver = [&](auto it) -> bool {
+            // from it to it + k - 1
+            int k = K;
+            if (it == std::end(st)) return false;
+            while (k) {
+                auto iou = dets[i].IoU(*it);
+                if (iou > iouThreshold && dets[i].score < (it->score)) {
+                    suppressed[dets[i].id] = 1;
+                    return true;
+                }
+                if (std::next(it) != std::end(st)) {
+                    it = std::next(it);
+                    k--;
+                } else {
+                    break;
+                }
             }
-        }
 
-        if (it != std::begin(st)) {
-            auto p = *(std::prev(it));
-            auto iou = dets[i].IoU(p);
-            if (iou > iouThreshold && dets[i].score < p.score) {
-                suppressed[dets[i].id] = 1;
-                st.insert(dets[i]);
-                continue;
+            return false;
+        };
+
+        auto leftSolver = [&](auto it) -> bool {
+            // from it - k to it - 1
+            int k = K;
+
+            if (it == std::begin(st)) return false;
+            it = std::prev(it);
+            while (k) {
+                auto iou = dets[i].IoU(*it);
+                if (iou > iouThreshold && dets[i].score < (it->score)) {
+                    suppressed[dets[i].id] = 1;
+                    return true;
+                }
+                if (it != std::begin(st)) {
+                    it = std::prev(it);
+                    k--;
+                } else {
+                    break;
+                }
             }
-        }
+
+            return false;
+        };
+
+        if (!leftSolver(it)) rightSolver(it);
 
         if (not suppressed[dets[i].id]) {
             keep.emplace_back(dets[i].id);
-            st.insert(dets[i]);
         }
-
+        st.insert(dets[i]);
     }
 
     return keep;

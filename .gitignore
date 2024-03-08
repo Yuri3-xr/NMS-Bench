@@ -39,3 +39,6 @@ build/
 
 # Data
 result/
+
+# VsCode
+.vscode/
