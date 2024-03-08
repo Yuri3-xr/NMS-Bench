@@ -3,6 +3,7 @@
 #include <cinttypes>
 #include <cstdint>
 #include <iostream>
+#include <tuple>
 
 template <class T>
 class Point {
@@ -32,6 +33,12 @@ class Point {
     }
     constexpr bool operator!=(const Point &r) const noexcept {
         return !(*this == r);
+    }
+    constexpr bool operator<(const Point &r) const {
+        return std::tie(x, y) < std::tie(r.x, r.y);
+    }
+    constexpr bool operator>(const Point &r) const {
+        return std::tie(x, y) > std::tie(r.x, r.y);
     }
     friend std::ostream &operator<<(std::ostream &os, const Point &p) {
         return os << p.x << " " << p.y;
@@ -125,5 +132,9 @@ class Box {
         auto p = (this->rect).midPoint - other.rect.midPoint;
         return static_cast<M>(sqrt(p.x * p.x + p.y * p.y));
         // return static_cast<M>(abs(p.x) + abs(p.y));
+    }
+
+    const Point<M> getMidPoint() const {
+        return rect.midPoint;
     }
 };
