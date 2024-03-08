@@ -15,7 +15,7 @@ auto fasterNMS(const std::vector<Box<T, M, S>>& boxes, const S& iouThreshold)
     -> std::vector<std::uint32_t> {
     auto size = std::size(boxes);
 
-    const unsigned int K = 3;
+    // const unsigned int K = 3;
 
     if ((int)size == 0) {
         // empty case
@@ -98,15 +98,20 @@ auto fasterNMS(const std::vector<Box<T, M, S>>& boxes, const S& iouThreshold)
 
     for (uint32_t i = 1; i < size; i++) {
         auto it = st.lower_bound(dets[i]);
-        auto p = *(it);
-        auto iou = dets[i].IoU(p);
-        if (iou > iouThreshold && dets[i].score < p.score) {
-            suppressed[dets[i].id] = 1;
-            st.insert(dets[i]);
-            continue;
+
+        if (it != std::end(st)) {
+            // itself
+            auto p = *(it);
+            auto iou = dets[i].IoU(p);
+            if (iou > iouThreshold && dets[i].score < p.score) {
+                suppressed[dets[i].id] = 1;
+                st.insert(dets[i]);
+                continue;
+            }
         }
 
-        if (std::next(it) != std::end(st)) {
+        if (it != std::end(st) && std::next(it) != std::end(st)) {
+            // next
             auto p = *(std::next(it));
             auto iou = dets[i].IoU(p);
             if (iou > iouThreshold && dets[i].score < p.score) {
@@ -117,6 +122,7 @@ auto fasterNMS(const std::vector<Box<T, M, S>>& boxes, const S& iouThreshold)
         }
 
         if (it != std::begin(st)) {
+            // previous
             auto p = *(std::prev(it));
             auto iou = dets[i].IoU(p);
             if (iou > iouThreshold && dets[i].score < p.score) {
@@ -130,7 +136,6 @@ auto fasterNMS(const std::vector<Box<T, M, S>>& boxes, const S& iouThreshold)
             keep.emplace_back(dets[i].id);
             st.insert(dets[i]);
         }
-
     }
 
     return keep;
