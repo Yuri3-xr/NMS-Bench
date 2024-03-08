@@ -12,6 +12,7 @@
 #include "../FasterNMS/CoverTree.hpp"
 #include "../FasterNMS/FasterNMS.hpp"
 #include "../SoftNMS/SoftNMS.hpp"
+#include "../BobNMS/BobNMS.hpp"
 #include "../GreedyNMS/GreedyNMS.hpp"
 #include "../Utils/time.hpp"
 #include "IO.hpp"
@@ -89,6 +90,8 @@ int main(int argc, char** argv) {
             keep = dNMS(boxes, iouThreshold);
         } else if (method == "SoftNMS") {
             keep = softNMS(boxes, iouThreshold, 0.5, 0.02, 1);
+        } else if (method == "BobNMS") {
+            keep = bobNMS(boxes, iouThreshold);
         } else {
             std::cerr << "No such method!" << std::endl;
             exit(-1);
