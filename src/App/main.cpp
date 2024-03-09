@@ -7,13 +7,13 @@
 #include <iostream>
 #include <vector>
 
+#include "../BobNMS/BobNMS.hpp"
 #include "../DNMS/DNMS.hpp"
 #include "../FastNMS/FastNMS.hpp"
 #include "../FasterNMS/CoverTree.hpp"
 #include "../FasterNMS/FasterNMS.hpp"
-#include "../SoftNMS/SoftNMS.hpp"
-#include "../BobNMS/BobNMS.hpp"
 #include "../GreedyNMS/GreedyNMS.hpp"
+#include "../SoftNMS/SoftNMS.hpp"
 #include "../Utils/time.hpp"
 #include "IO.hpp"
 
@@ -89,7 +89,7 @@ int main(int argc, char** argv) {
         } else if (method == "DNMS") {
             keep = dNMS(boxes, iouThreshold);
         } else if (method == "SoftNMS") {
-            keep = softNMS(boxes, iouThreshold, 0.5, 0.02, 1);
+            keep = softNMS(boxes, iouThreshold, 0.5, 0.08, 1);
         } else if (method == "BobNMS") {
             keep = bobNMS(boxes, iouThreshold);
         } else {
@@ -117,6 +117,6 @@ int main(int argc, char** argv) {
         outFile.close();
     }
 
-    std::cerr << method << " process time is " << sumTime << "ms" <<std::endl;
+    std::cerr << method << " process time is " << sumTime << "ms" << std::endl;
     return 0;
 }
