@@ -3,11 +3,11 @@ CFLAGS := -std=c++17 -Wall -ffast-math -funroll-loops -O3
 
 SRCDIR := src
 BUILDDIR := build
-OUTPUTDIR := build/output
+OUTPUTDIR := build/app
 TARGET := $(OUTPUTDIR)/main
 
 # 查找所有.cpp文件
-SOURCES := $(wildcard $(SRCDIR)/**/*.cpp)
+SOURCES := $(wildcard $(SRCDIR)/*.cpp)
 # 生成对应的.o文件列表
 OBJECTS := $(patsubst $(SRCDIR)/%.cpp,$(BUILDDIR)/%.o,$(SOURCES))
 

@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <vector>
 
-#include "../App/NMS.hpp"
+#include "../Utils/NMS.hpp"
 
 template <class T, class M, class S>
 auto fastNMS(const std::vector<Box<T, M, S>>& boxes, const S& iouThreshold)
