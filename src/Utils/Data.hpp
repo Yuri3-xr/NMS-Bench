@@ -4,6 +4,7 @@
 #include <fstream>
 #include <cstdint>
 #include <vector>
+#include <set>
 
 #include "./NMS.hpp"
 
@@ -29,8 +30,14 @@ class Data {
     uint32_t img_id;
     std::vector<BBox<T, M, S>> preds;
     std::vector<BBox<T, M, S>> labels;
+    std::set<uint32_t> vis_labels;
     Data(uint32_t _img_id = 0) 
-        : img_id(_img_id), preds(std::vector<BBox<T, M, S>>()), labels(std::vector<BBox<T, M, S>>()) {}
+        : 
+        img_id(_img_id), 
+        preds(std::vector<BBox<T, M, S>>()), 
+        labels(std::vector<BBox<T, M, S>>()), 
+        vis_labels(std::set<uint32_t>()) 
+        {}
     ~Data() {}
 
     void set_img_id(uint32_t _img_id) {
@@ -64,10 +71,12 @@ class Data {
             p++;
         }
         inLabelFile >> header;
+        p = 0;
         while (inLabelFile >> _img_id >> ch 
                 >> _categoriy_id >> ch 
                 >> ltx >> ch >> lty >> ch >> w >> ch >> h) {
             rbx = ltx + w, rby = lty + h;
+            // std::cerr << ltx << ", " << lty << std::endl;
             auto box = Box<T, M, S>(Rect<T, M>(Point<T>(ltx, lty), Point<T>(rbx, rby)),
                            0, p);
             labels.emplace_back(_categoriy_id, box);
@@ -89,4 +98,30 @@ class Data {
         }
         return boxes;
     }
+
+    std::vector<uint32_t> label_category_id() {
+        std::vector<uint32_t> res;
+        for (auto label : labels) {
+            auto category_id = label.category_id;
+            res.emplace_back(category_id);
+        }
+        return res;
+    }
+
+    std::tuple<uint32_t, S, bool> get_tf(uint32_t pred_id, T iou_threshold) {
+        auto pred_bbox = preds[pred_id];
+        uint32_t pred_category_id = pred_bbox.category_id;
+        auto pred_box = pred_bbox.box;
+        for (uint32_t i = 0; i < labels.size(); i++) {
+            auto label = labels[i];
+            uint32_t category_id = label.category_id;
+            auto box = label.box;
+            if (vis_labels.count(i)) continue;
+            if (category_id == pred_category_id && pred_box.IoU(box) >= iou_threshold) {
+                vis_labels.insert(i);
+                return {pred_category_id, pred_box.score, true};
+            }
+        }
+        return {pred_category_id, pred_box.score, false};
+    }   
 };

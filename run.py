@@ -2,12 +2,14 @@ import os
 
 method = str(input())
 
-input_file = '/data02/sl/nms_data/nms_yolov8n_crowdhuman_gpu/'
+# input_pred_file = './data/debug/'
+input_pred_file = './data/coco_yolov8n/preds/'
+input_lable_file = './data/coco_yolov8n/labels/'
 # gpu / cpu dataset is a little different, pay attention
-output_file = 'result/nms_yolov8n_crowdhuman_output' + '_' + method + '/' 
+output_file = 'result/' + method + '/' 
 
 
-command = './build/output/main' + ' ' + input_file + ' ' + output_file  + ' ' + method
+command = './build/app/main' + ' ' + input_pred_file + ' ' + input_lable_file + ' ' + output_file  + ' ' + method
 os.system(command)
 
 
