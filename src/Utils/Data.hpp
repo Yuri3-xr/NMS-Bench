@@ -2,11 +2,13 @@
 
 #include <cinttypes>
 #include <fstream>
+#include <sstream>
 #include <cstdint>
 #include <vector>
 #include <set>
 
 #include "./NMS.hpp"
+#include "./IO.hpp"
 
 template <class T, class M, class S>
 class BBox {
@@ -27,22 +29,21 @@ class BBox {
 template <class T, class M, class S>
 class Data {
   public:
-    uint32_t img_id;
+    // std::string img_id;
     std::vector<BBox<T, M, S>> preds;
     std::vector<BBox<T, M, S>> labels;
     std::set<uint32_t> vis_labels;
-    Data(uint32_t _img_id = 0) 
-        : 
-        img_id(_img_id), 
+    Data() 
+        :  
         preds(std::vector<BBox<T, M, S>>()), 
         labels(std::vector<BBox<T, M, S>>()), 
         vis_labels(std::set<uint32_t>()) 
         {}
     ~Data() {}
 
-    void set_img_id(uint32_t _img_id) {
-        img_id = _img_id;
-    }
+    // void set_img_id(std::string _img_id) {
+    //     img_id = _img_id;
+    // }
 
     void add_pred(BBox<T, M, S> pred) {
         preds.emplace_back(pred);
@@ -53,42 +54,52 @@ class Data {
     }
 
     void input(std::fstream& inPredFile, std::fstream& inLabelFile) {
-        uint32_t _img_id, _categoriy_id;
+        std::string _img_id; 
+        uint32_t _categoriy_id;
         T ltx, lty, rbx, rby, w, h;
         S score;
+        int iscrowd;
+
         uint32_t p = 0;
-        std::string header;
-        char ch;
-        inPredFile >> header;
-        while (inPredFile >> _img_id >> ch 
-                >> _categoriy_id >> ch 
-                >> ltx >> ch >> lty >> ch >> w >> ch >> h >> ch >> score) {
+        std::string buf;
+        std::stringstream ss;
+
+        inPredFile >> buf; // ignore header
+        while (inPredFile >> buf) {
+            string_split(ss, buf, ',');
+            ss >> _img_id
+                >> _categoriy_id
+                >> ltx >> lty >> w >> h >> score;
             rbx = ltx + w, rby = lty + h;
+            // std::cerr << _img_id << " " << _categoriy_id 
+                // << " " << ltx << " " << lty << " " << w << " " << h << std::endl;
             auto box = Box<T, M, S>(Rect<T, M>(Point<T>(ltx, lty), Point<T>(rbx, rby)),
                            score, p);
             preds.emplace_back(_categoriy_id, box);
-            set_img_id(_img_id);
             p++;
+            ss.clear();
         }
-        inLabelFile >> header;
+
+        inLabelFile >> buf; // ignore header
         p = 0;
-        int iscrowd;
-        while (inLabelFile >> _img_id >> ch 
-                >> _categoriy_id >> ch 
-                >> ltx >> ch >> lty >> ch >> w >> ch >> h >> ch >> iscrowd) {
+        while (inLabelFile >> buf) {
+            string_split(ss, buf, ',');
+            ss >> _img_id
+                >> _categoriy_id
+                >> ltx >> lty >> w >> h >> iscrowd;
             rbx = ltx + w, rby = lty + h;
             auto box = Box<T, M, S>(Rect<T, M>(Point<T>(ltx, lty), Point<T>(rbx, rby)),
                            (T)(1 - iscrowd), p);
             labels.emplace_back(_categoriy_id, box);
-            set_img_id(_img_id);
             p++;
+            ss.clear();
         }
         std::sort(labels.begin(), labels.end());
     }
 
     std::vector<Box<T, M, S>> pred_boxes(bool batched_nms = true, uint32_t max_wh = 7680) {
         std::vector<Box<T, M, S>> boxes;
-        for (auto pred : preds) {
+        for (auto &pred : preds) {
             auto box = pred.box;
             auto category_id = pred.category_id;
             uint32_t offset = (batched_nms == true) * max_wh * category_id;
@@ -102,7 +113,7 @@ class Data {
 
     std::vector<int32_t> label_category_id() {
         std::vector<int32_t> res;
-        for (auto label : labels) {
+        for (auto &label : labels) {
             auto category_id = label.category_id;
             if (label.box.score < 0.5) {
                 res.emplace_back(-1);
@@ -120,7 +131,7 @@ class Data {
         int m = -1;
         T iou = iou_threshold;
         for (uint32_t i = 0; i < labels.size(); i++) {
-            auto label = labels[i];
+            auto &label = labels[i];
             uint32_t category_id = label.category_id;
             if (category_id != pred_category_id) continue;
             auto box = label.box;

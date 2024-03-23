@@ -1,10 +1,22 @@
 #pragma once
 
 #include <fstream>
+#include <sstream>
+#include <iostream>
+#include <string>
 #include <iomanip>
 #include <vector>
 
 #include "NMS.hpp"
+
+void string_split(std::stringstream& ss, const std::string& str, char ch) {
+    std::istringstream iss(str);
+    std::string buf;
+    for (uint32_t i = 0; std::getline(iss, buf, ch); i++) {
+        if (i) ss << " ";
+        ss << buf;
+    }
+}
 
 template <class T, class M, class S>
 auto input(std::vector<Box<T, M, S>>& boxes, std::fstream& inFile) -> void {
