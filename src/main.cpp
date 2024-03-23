@@ -6,6 +6,7 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <iomanip>
 
 #include "./BobNMS/BobNMS.hpp"
 #include "./DNMS/DNMS.hpp"
@@ -71,7 +72,9 @@ int main(int argc, char** argv) {
     std::uint64_t sumTime = 0;
     std::filesystem::directory_iterator inList(inPredPath);
 
-    COCOMetrics<double> metrics;
+    int cnt = 0;
+
+    std::vector<COCOMetrics<double>> coco_metrics(10);
 
     for (const auto& file : inList) {
         std::fstream inPredFile, inLabelFile, outFile;
@@ -131,16 +134,33 @@ int main(int argc, char** argv) {
         sumTime += timer.elapsed();
 
         auto gt_category_id = data.label_category_id();
-        for (auto cid : gt_category_id) {
-            // std::cerr << cid << "GT" << std::endl;
-            metrics.add_gt(cid);
+        for (uint32_t i = 0; i < 10; i++) {
+            for (auto cid : gt_category_id) {
+                // std::cerr << cid << "GT" << std::endl;
+                if (cid != -1) {
+                    coco_metrics[i].add_gt(cid);
+                }
+            }
+        }
+        // std::cerr << "num: " << gt_category_id.size() << std::endl;
+
+        // int cnt = 0;
+        for (uint32_t  i = 0; i < 10; i++) {
+            data.reset_vis_labels();
+            for (uint32_t j = 0; j < std::min<uint32_t>(keep.size(), maxDets); j++) {
+                auto [category_id, score, tf] = data.get_tf(keep[j], 0.5 + 0.05 * i);
+                // std::cerr << category_id << ", " << score << ": " << tf << std::endl;
+                if (tf == 1) {
+                    // std::cerr << i << ": " << category_id << ", " << score << std::endl;
+                    cnt += 1;
+                }
+                if (tf >= 0) {
+                    coco_metrics[i].insert_tf(category_id, score, tf);
+                }
+            }
         }
 
-        for (uint32_t i = 0; i < std::min<uint32_t>(keep.size(), maxDets); i++) {
-            auto [category_id, score, tf] = data.get_tf(keep[i], 0.5);
-            // std::cerr << category_id << ", " << score << ": " << tf << std::endl;
-            metrics.insert_tf(category_id, score, tf);
-        }
+        // std::cerr << "#tf: " << cnt << std::endl;
 
         output(keep, outFile);
 
@@ -151,8 +171,27 @@ int main(int argc, char** argv) {
 
     std::cerr << method << " process time is " << sumTime << "ms" << std::endl;
 
-    metrics.finalize();
-    metrics.evaluate();
-    std::cout << method << " mAP 50 is " << metrics.ap50 << std::endl;
+    double ap50 = 0, ap75 = 0, ap5095 = 0;
+    for (uint32_t i = 0; i < 10; i++) {
+        coco_metrics[i].finalize();
+        coco_metrics[i].evaluate();
+        ap5095 += coco_metrics[i].get_ap();
+    }
+    // coco_metrics[0].finalize();
+    // coco_metrics[0].evaluate();
+    ap50 = coco_metrics[0].get_ap();
+    ap75 = coco_metrics[5].get_ap();
+    std::cout << std::fixed;
+    std::cout << std::left << std::setw(12) 
+        << "mAP 50:95 ";
+    std::cout << std::setprecision(3) << " = " << ap5095 / 10 << std::endl;
+    std::cout << std::left << std::setw(12) 
+        << "mAP 50 ";
+    std::cout << std::setprecision(3) << " = " << ap50 << std::endl;
+    std::cout << std::left << std::setw(12) 
+        << "mAP 75 ";
+    std::cout << std::setprecision(3) << " = " << ap75 << std::endl;
+
+    // std::cerr << cnt << std::endl;
     return 0;
 }

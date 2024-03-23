@@ -19,7 +19,7 @@ class BBox {
 
     bool operator<(const BBox &b) const {
         if (box < b.box) return true;
-        if (box > b.box) return false;
+        if (b.box < box) return false;
         return category_id < b.category_id;
     }
 };
@@ -72,17 +72,18 @@ class Data {
         }
         inLabelFile >> header;
         p = 0;
+        int iscrowd;
         while (inLabelFile >> _img_id >> ch 
                 >> _categoriy_id >> ch 
-                >> ltx >> ch >> lty >> ch >> w >> ch >> h) {
+                >> ltx >> ch >> lty >> ch >> w >> ch >> h >> ch >> iscrowd) {
             rbx = ltx + w, rby = lty + h;
-            // std::cerr << ltx << ", " << lty << std::endl;
             auto box = Box<T, M, S>(Rect<T, M>(Point<T>(ltx, lty), Point<T>(rbx, rby)),
-                           0, p);
+                           (T)(1 - iscrowd), p);
             labels.emplace_back(_categoriy_id, box);
             set_img_id(_img_id);
             p++;
         }
+        std::sort(labels.begin(), labels.end());
     }
 
     std::vector<Box<T, M, S>> pred_boxes(bool batched_nms = true, uint32_t max_wh = 7680) {
@@ -99,29 +100,57 @@ class Data {
         return boxes;
     }
 
-    std::vector<uint32_t> label_category_id() {
-        std::vector<uint32_t> res;
+    std::vector<int32_t> label_category_id() {
+        std::vector<int32_t> res;
         for (auto label : labels) {
             auto category_id = label.category_id;
-            res.emplace_back(category_id);
+            if (label.box.score < 0.5) {
+                res.emplace_back(-1);
+            } else {
+                res.emplace_back(category_id);
+            }
         }
         return res;
     }
 
-    std::tuple<uint32_t, S, bool> get_tf(uint32_t pred_id, T iou_threshold) {
+    std::tuple<uint32_t, S, int> get_tf(uint32_t pred_id, T iou_threshold) {
         auto pred_bbox = preds[pred_id];
         uint32_t pred_category_id = pred_bbox.category_id;
         auto pred_box = pred_bbox.box;
+        int m = -1;
+        T iou = iou_threshold;
         for (uint32_t i = 0; i < labels.size(); i++) {
             auto label = labels[i];
             uint32_t category_id = label.category_id;
+            if (category_id != pred_category_id) continue;
             auto box = label.box;
-            if (vis_labels.count(i)) continue;
-            if (category_id == pred_category_id && pred_box.IoU(box) >= iou_threshold) {
-                vis_labels.insert(i);
-                return {pred_category_id, pred_box.score, true};
+            if (vis_labels.count(i) && box.score > 0.5) continue;
+            T now_iou = pred_box.IoU(box);
+            if (box.score < 0.5) {
+                // if crowd, iou = i / da instead of i / u.
+                T da = pred_bbox.box.rect.area();
+                T ga = box.rect.area();
+                now_iou *= (da + ga - now_iou) / da;
+            }
+            if (m != -1 && labels[m].box.score > 0.5 && box.score < 0.5) break; // if matches and not crowd while get a crowd label 
+            if (now_iou < iou) continue;
+            iou = now_iou; // find the best iou
+            m = i;
+        }
+        if (m == -1) {
+            return {pred_category_id, pred_box.score, 0};
+        } else {
+            vis_labels.insert(m);
+            if (labels[m].box.score < 0.5) {
+                // iscrowd, ignore
+                return {pred_category_id, pred_box.score, -1};
+            } else {
+                return {pred_category_id, pred_box.score, 1};
             }
         }
-        return {pred_category_id, pred_box.score, false};
     }   
+
+    void reset_vis_labels() {
+        vis_labels.clear();
+    }
 };

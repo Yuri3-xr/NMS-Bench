@@ -3,7 +3,7 @@ import os
 method = str(input())
 
 # input_pred_file = './data/debug/'
-input_pred_file = './data/coco_yolov8n/preds/'
+input_pred_file = './data/coco_yolov8m/preds/'
 input_lable_file = './data/coco_yolov8n/labels/'
 # gpu / cpu dataset is a little different, pay attention
 output_file = 'result/' + method + '/' 
