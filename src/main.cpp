@@ -15,8 +15,7 @@
 #include "./FasterNMS/FasterNMS.hpp"
 #include "./GreedyNMS/GreedyNMS.hpp"
 #include "./SoftNMS/SoftNMS.hpp"
-#include "./Utils/time.hpp"
-#include "./Utils/IO.hpp"
+#include "./Utils/utils.hpp"
 #include "./Utils/Data.hpp"
 #include "./Utils/COCOMetrics.hpp"
 
