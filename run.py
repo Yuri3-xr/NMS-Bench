@@ -1,16 +1,23 @@
+import argparse
 import os
 
-method = str(input())
+def main():
+    parser = argparse.ArgumentParser(description='NMS bench parameters')
+    parser.add_argument('--preds', default='./data/coco/yolo-series/v8m-preds/', type=str, help='the path of preds')
+    parser.add_argument('--labels', default='./data/coco/labels/', type=str, help='the path of labels')
+    parser.add_argument('--output', default='./results/', type=str, help='the path of output')
+    parser.add_argument('--method', default='BobNMS', type=str, help='the name of NMS algorithm')
+    args = parser.parse_args()
+    
+    input_pred_file = args.preds
+    input_label_file = args.labels
+    output_file = args.output
+    method = args.method
 
-# input_pred_file = './data/debug/'
-input_pred_file = './data/coco_yolov8m/preds/'
-input_lable_file = './data/coco_yolov8n/labels/'
-# gpu / cpu dataset is a little different, pay attention
-output_file = 'result/' + method + '/' 
+    command = './build/app/main' + ' ' + input_pred_file + ' ' + input_label_file + ' ' + output_file  + ' ' + method
+    os.system(command)
+
+if __name__ == '__main__':
+    main()
 
 
-command = './build/app/main' + ' ' + input_pred_file + ' ' + input_lable_file + ' ' + output_file  + ' ' + method
-os.system(command)
-
-
-print("[test done!]")
