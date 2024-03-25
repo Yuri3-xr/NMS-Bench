@@ -4,20 +4,21 @@
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <vector>
-#include <iomanip>
 
 #include "./BobNMS/BobNMS.hpp"
 #include "./DNMS/DNMS.hpp"
 #include "./FastNMS/FastNMS.hpp"
+#include "./FastNMS/FastNMS_Par.hpp"
 #include "./FasterNMS/CoverTree.hpp"
 #include "./FasterNMS/FasterNMS.hpp"
 #include "./GreedyNMS/GreedyNMS.hpp"
 #include "./SoftNMS/SoftNMS.hpp"
-#include "./Utils/utils.hpp"
-#include "./Utils/Data.hpp"
 #include "./Utils/COCOMetrics.hpp"
+#include "./Utils/Data.hpp"
+#include "./Utils/utils.hpp"
 
 // std::vector<Box<double, double, double>> boxes;
 std::vector<std::uint32_t> keep;
@@ -80,17 +81,18 @@ int main(int argc, char** argv) {
 
         std::string inPredFileName =
             std::string(argv[1]) + std::string(file.path().filename());
-        std::string inLabelFileName = 
+        std::string inLabelFileName =
             std::string(argv[2]) + std::string(file.path().filename());
         std::string outFileName =
             std::string(argv[3]) + std::string(file.path().filename());
 
-        // std::cerr << inPredFileName << " " << inLabelFileName << " " << outFileName << std::endl;
+        // std::cerr << inPredFileName << " " << inLabelFileName << " "
+        //           << outFileName << std::endl;
 
         inPredFile.open(inPredFileName,
-                    std::ios::in | std::ios::out | std::ios::binary);
+                        std::ios::in | std::ios::out | std::ios::binary);
         inLabelFile.open(inLabelFileName,
-                    std::ios::in | std::ios::out | std::ios::binary);
+                         std::ios::in | std::ios::out | std::ios::binary);
         outFile.open(outFileName, std::ios::in | std::ios::out |
                                       std::ios::binary | std::ios::trunc);
 
@@ -105,18 +107,20 @@ int main(int argc, char** argv) {
         auto boxes = data.pred_boxes();
 
         // for (auto box : boxes) {
-        //     std::cout << data.img_id << " ";
-        //     std::cout << box.rect.lt << " " << box.rect.rb << " " << box.score << std::endl;
+        //     std::cout << box.rect.lt << " " << box.rect.rb << " " <<
+        //     box.score
+        //               << std::endl;
         // }
 
         // break;
 
         timer.reset();
-
         if (method == "GreedyNMS") {
             keep = greedyNMS(boxes, iouThreshold);
         } else if (method == "FastNMS") {
             keep = fastNMS(boxes, iouThreshold);
+        } else if (method == "FastNMS_Par") {
+            keep = fastNMS_Par(boxes, iouThreshold);
         } else if (method == "FasterNMS") {
             keep = fasterNMS(boxes, iouThreshold);
         } else if (method == "DNMS") {
@@ -144,13 +148,17 @@ int main(int argc, char** argv) {
         // std::cerr << "num: " << gt_category_id.size() << std::endl;
 
         // int cnt = 0;
-        for (uint32_t  i = 0; i < 10; i++) {
+        for (uint32_t i = 0; i < 10; i++) {
             data.reset_vis_labels();
-            for (uint32_t j = 0; j < std::min<uint32_t>(keep.size(), maxDets); j++) {
-                auto [category_id, score, tf] = data.get_tf(keep[j], 0.5 + 0.05 * i);
-                // std::cerr << category_id << ", " << score << ": " << tf << std::endl;
+            for (uint32_t j = 0; j < std::min<uint32_t>(keep.size(), maxDets);
+                 j++) {
+                auto [category_id, score, tf] =
+                    data.get_tf(keep[j], 0.5 + 0.05 * i);
+                // std::cerr << category_id << ", " << score << ": " << tf <<
+                // std::endl;
                 if (tf == 1) {
-                    // std::cerr << i << ": " << category_id << ", " << score << std::endl;
+                    // std::cerr << i << ": " << category_id << ", " << score <<
+                    // std::endl;
                     cnt += 1;
                 }
                 if (tf >= 0) {
@@ -181,14 +189,11 @@ int main(int argc, char** argv) {
     ap50 = coco_metrics[0].get_ap();
     ap75 = coco_metrics[5].get_ap();
     std::cout << std::fixed;
-    std::cout << std::left << std::setw(12) 
-        << "mAP 50:95 ";
+    std::cout << std::left << std::setw(12) << "mAP 50:95 ";
     std::cout << std::setprecision(3) << " = " << ap5095 / 10 << std::endl;
-    std::cout << std::left << std::setw(12) 
-        << "mAP 50 ";
+    std::cout << std::left << std::setw(12) << "mAP 50 ";
     std::cout << std::setprecision(3) << " = " << ap50 << std::endl;
-    std::cout << std::left << std::setw(12) 
-        << "mAP 75 ";
+    std::cout << std::left << std::setw(12) << "mAP 75 ";
     std::cout << std::setprecision(3) << " = " << ap75 << std::endl;
 
     // std::cerr << cnt << std::endl;

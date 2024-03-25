@@ -1,5 +1,6 @@
 CC := g++
-CFLAGS := -std=c++17 -Wall -ffast-math -funroll-loops -O3
+CFLAGS := -std=c++17 -Wall -ffast-math -funroll-loops -O3 
+LDFLAGS=-ltbb
 
 SRCDIR := src
 BUILDDIR := build
@@ -16,7 +17,7 @@ all: $(TARGET)
 $(TARGET): $(OBJECTS)
 	@mkdir -p $(dir $@)
 	@echo " Linking $@"
-	@$(CC) $^ -o $@
+	@$(CC) $^ -o $@ $(LDFLAGS)
 
 $(BUILDDIR)/%.o: $(SRCDIR)/%.cpp
 	@mkdir -p $(dir $@)
