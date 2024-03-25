@@ -8,7 +8,7 @@
 #include <queue>
 #include <vector>
 
-#include "../App/NMS.hpp"
+#include "../Utils/NMS.hpp"
 
 template <class S>
 auto getIoUhreshold(const S& sigma, const S& iouThreshold) -> S {

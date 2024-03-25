@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <vector>
 
-#include "../App/NMS.hpp"
+#include "../Utils/NMS.hpp"
 
 template<class S>
 S fLinear(S iou) {

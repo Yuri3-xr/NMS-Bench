@@ -7,7 +7,7 @@
 #include <cstdint>
 #include <vector>
 
-#include "../App/NMS.hpp"
+#include "../Utils/NMS.hpp"
 #include "CoverTree.hpp"
 
 template <class T, class M, class S>

@@ -7,7 +7,7 @@
 #include <vector>
 #include <tuple>
 
-#include "../App/NMS.hpp"
+#include "../Utils/NMS.hpp"
 
 template <class T, class M, class S>
 auto bobNMS(const std::vector<Box<T, M, S>>& boxes, const S& iouThreshold)
