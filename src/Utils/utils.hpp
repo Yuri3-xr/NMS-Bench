@@ -52,7 +52,7 @@ struct Timer {
 
     std::chrono::milliseconds::rep elapsed() {
         auto ed = std::chrono::high_resolution_clock::now();
-        return std::chrono::duration_cast<std::chrono::milliseconds>(ed - st)
+        return std::chrono::duration_cast<std::chrono::microseconds>(ed - st)
             .count();
     }
 };

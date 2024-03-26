@@ -176,7 +176,7 @@ int main(int argc, char** argv) {
         outFile.close();
     }
 
-    std::cerr << method << " process time is " << sumTime << "ms" << std::endl;
+    std::cout << method << " process time is " << (double)(sumTime) / 1000 << " ms" << std::endl;
 
     double ap50 = 0, ap75 = 0, ap5095 = 0;
     for (uint32_t i = 0; i < 10; i++) {
