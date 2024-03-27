@@ -134,7 +134,7 @@ class Box {
         // return static_cast<M>(abs(p.x) + abs(p.y));
     }
 
-    const Point<M> getMidPoint() const {
+    const Point<M>& getMidPoint() const {
         return rect.midPoint;
     }
 };
