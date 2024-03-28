@@ -10,6 +10,7 @@
 
 #include "./BobNMS/BobNMS.hpp"
 #include "./AliceNMS/AliceNMS.hpp"
+#include "./AliceNMS/UltraAliceNMS.hpp"
 #include "./DNMS/DNMS.hpp"
 #include "./FastNMS/FastNMS.hpp"
 #include "./FasterNMS/CoverTree.hpp"
@@ -128,6 +129,8 @@ int main(int argc, char** argv) {
             keep = bobNMS(boxes, iouThreshold);
         } else if (method == "AliceNMS") {
             keep = aliceNMS(boxes, iouThreshold);
+        } else if (method == "UltraAliceNMS") {
+            keep = ultraAliceNMS(boxes, iouThreshold);
         } else {
             std::cerr << "No such method!" << std::endl;
             exit(-1);
