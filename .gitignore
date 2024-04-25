@@ -38,7 +38,8 @@
 build/
 
 # Data
-result/
+results/
 data/
+data
 
 .vscode/
