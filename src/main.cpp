@@ -8,9 +8,9 @@
 #include <iostream>
 #include <vector>
 
-#include "./BobNMS/BobNMS.hpp"
 #include "./AliceNMS/AliceNMS.hpp"
 #include "./AliceNMS/UltraAliceNMS.hpp"
+#include "./BobNMS/BobNMS.hpp"
 #include "./DNMS/DNMS.hpp"
 #include "./FastNMS/FastNMS.hpp"
 #include "./FastNMS/FastNMS_Par.hpp"
@@ -88,8 +88,8 @@ int main(int argc, char** argv) {
         std::string outFileName =
             std::string(argv[3]) + std::string(file.path().filename());
 
-        // std::cerr << inPredFileName << " " << inLabelFileName << " "
-        //           << outFileName << std::endl;
+        // std::cerr << inPredFileName << " " << inLabelFileName << " " <<
+        // outFileName << std::endl;
 
         inPredFile.open(inPredFileName,
                         std::ios::in | std::ios::out | std::ios::binary);
@@ -109,9 +109,9 @@ int main(int argc, char** argv) {
         auto boxes = data.pred_boxes();
 
         // for (auto box : boxes) {
+        //     std::cout << data.img_id << " ";
         //     std::cout << box.rect.lt << " " << box.rect.rb << " " <<
-        //     box.score
-        //               << std::endl;
+        //     box.score << std::endl;
         // }
 
         // break;
@@ -153,9 +153,8 @@ int main(int argc, char** argv) {
         }
         // std::cerr << "num: " << gt_category_id.size() << std::endl;
 
-        std::sort(keep.begin(), keep.end(), [&] (auto x, auto y) {
-            return boxes[x] < boxes[y];
-        });
+        std::sort(keep.begin(), keep.end(),
+                  [&](auto x, auto y) { return boxes[x] < boxes[y]; });
 
         // int cnt = 0;
         for (uint32_t i = 0; i < 10; i++) {
@@ -186,7 +185,8 @@ int main(int argc, char** argv) {
         outFile.close();
     }
 
-    std::cout << method << " process time is " << (double)(sumTime) / 1000 << " ms" << std::endl;
+    std::cout << method << " process time is " << (double)(sumTime) / 1000
+              << " ms" << std::endl;
 
     double ap50 = 0, ap75 = 0, ap5095 = 0;
     for (uint32_t i = 0; i < 10; i++) {
