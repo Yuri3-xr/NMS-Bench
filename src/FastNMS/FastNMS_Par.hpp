@@ -12,7 +12,7 @@
 #include "../Utils/NMS.hpp"
 
 template <class T, class M, class S>
-auto fastNMS(const std::vector<Box<T, M, S>>& boxes, const S& iouThreshold)
+auto fastNMS_Par(const std::vector<Box<T, M, S>>& boxes, const S& iouThreshold)
     -> std::vector<std::uint32_t> {
     auto size = std::size(boxes);
 
@@ -23,10 +23,10 @@ auto fastNMS(const std::vector<Box<T, M, S>>& boxes, const S& iouThreshold)
 
     auto dets = boxes;
 
-    std::sort(std::execution::seq, std::begin(dets), std::end(dets));
+    std::sort(std::execution::par_unseq, std::begin(dets), std::end(dets));
 
     std::vector<uint8_t> suppressed(size);
-    std::for_each(std::execution::seq, std::begin(dets), std::end(dets),
+    std::for_each(std::execution::par_unseq, std::begin(dets), std::end(dets),
                   [&dets, &size, &iouThreshold, &suppressed](const auto& det) {
                       auto i = &det - &dets[0];
                       S t = 0;

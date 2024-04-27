@@ -52,6 +52,7 @@ class Point {
 template <class T, class M>
 class Rect {
    public:
+    Rect() : lt(0, 0), rb(0, 0), midPoint(0, 0){};
     Point<T> lt, rb;
     /*
         lt: left-top point
@@ -80,10 +81,8 @@ class Rect {
         return (*this);
     }
     constexpr auto area() const noexcept -> T {
-    
         auto width = std::max(static_cast<T>(0), rb.x - lt.x);
         auto height = std::max(static_cast<T>(0), rb.y - lt.y);
-
 
         return width * height;
     }
@@ -98,13 +97,15 @@ class Rect {
 template <class T, class M, class S>
 class Box {
    public:
+    Box() { score = 0; }
     Rect<T, M> rect;
     S score;
     uint32_t id = -1;
     constexpr Box(Rect<T, M> _rect, S _score, uint32_t _id)
         : rect(_rect), score(_score), id(_id){};
 
-    friend bool operator<(const Box<T, M, S> &_cmpa, const Box<T, M, S> &_cmpb) {
+    friend bool operator<(const Box<T, M, S> &_cmpa,
+                          const Box<T, M, S> &_cmpb) {
         return _cmpa.score > _cmpb.score;
     }
     bool operator==(const Box &p) const { return id == p.id; }
@@ -131,10 +132,7 @@ class Box {
     T distance(const Box<T, M, S> &other) const {
         auto p = (this->rect).midPoint - other.rect.midPoint;
         return static_cast<M>(sqrt(p.x * p.x + p.y * p.y));
-        // return static_cast<M>(abs(p.x) + abs(p.y));
     }
 
-    const Point<M>& getMidPoint() const {
-        return rect.midPoint;
-    }
+    const Point<M> getMidPoint() const { return rect.midPoint; }
 };

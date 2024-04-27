@@ -30,7 +30,6 @@
 *.exe
 *.out
 *.app
-
 # MacOS DS_Store
 **/.DS_Store
 
@@ -38,7 +37,8 @@
 build/
 
 # Data
-result/
+results/
 data/
+data
 
 .vscode/
