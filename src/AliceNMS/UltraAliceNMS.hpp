@@ -38,7 +38,7 @@ auto ultraAliceNMS(const std::vector<Box<T, M, S>>& boxes, const S& iouThreshold
     for (int i = 0; i < (int)size; i++) {
         while (!id_stk.empty() && dets[id_stk.top()].score < dets[i].score) {
             auto &stk_box = dets[id_stk.top()];
-            if (dets[i].IoU(stk_box) > iouThreshold && dp[dets[i].id]) {
+            if (dets[i].IoU(stk_box) > iouThreshold) {
                 dp[stk_box.id] = 0;
             }
             id_stk.pop();
@@ -51,7 +51,7 @@ auto ultraAliceNMS(const std::vector<Box<T, M, S>>& boxes, const S& iouThreshold
     for (int i = (int)size - 1; i >= 0; i--) {
         while (!id_stk.empty() && dets[id_stk.top()].score < dets[i].score) {
             auto &stk_box = dets[id_stk.top()];
-            if (dets[i].IoU(stk_box) > iouThreshold && dp[dets[i].id]) {
+            if (dets[i].IoU(stk_box) > iouThreshold) {
                 dp[stk_box.id] = 0;
             }
             id_stk.pop();
