@@ -11,6 +11,7 @@
 #include "./AliceNMS/AliceNMS.hpp"
 #include "./AliceNMS/UltraAliceNMS.hpp"
 #include "./BobNMS/BobNMS.hpp"
+#include "./ClusterNMS/ClusterNMS.hpp"
 #include "./DNMS/DNMS.hpp"
 #include "./FastNMS/FastNMS.hpp"
 #include "./FastNMS/FastNMS_Par.hpp"
@@ -135,6 +136,8 @@ int main(int argc, char** argv) {
             keep = aliceNMS(boxes, iouThreshold);
         } else if (method == "UltraAliceNMS") {
             keep = ultraAliceNMS(boxes, iouThreshold);
+        } else if (method == "ClusterNMS") {
+            keep = clusterNMS(boxes, iouThreshold);
         } else {
             std::cerr << "No such method!" << std::endl;
             exit(-1);

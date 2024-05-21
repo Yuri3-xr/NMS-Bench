@@ -35,7 +35,9 @@ class Point {
         return !(*this == r);
     }
     constexpr bool operator<(const Point &r) const {
-        return std::tie(x, y) < std::tie(r.x, r.y);
+        return x + y < r.x + r.y;
+        // return std::tie(x, y) < std::tie(r.x, r.y);
+        // return x * x + y * y < r.x * r.x + r.y * r.y;
     }
     constexpr bool operator>(const Point &r) const {
         return std::tie(x, y) > std::tie(r.x, r.y);

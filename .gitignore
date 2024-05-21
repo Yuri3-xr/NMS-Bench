@@ -42,3 +42,7 @@ data/
 data
 
 .vscode/
+
+count.py
+
+exp.py
