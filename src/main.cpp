@@ -73,7 +73,7 @@ int main(int argc, char** argv) {
     std::filesystem::directory_iterator inList(inPredPath);
 
     int cnt = 0;
-
+    int total_images = 0;
     std::vector<COCOMetrics<double>> coco_metrics(10);
 
     for (const auto& file : inList) {
@@ -113,7 +113,7 @@ int main(int argc, char** argv) {
         // }
 
         // break;
-
+        total_images += 1;
         timer.reset();
         if (method == "OrignalNMS") {
             keep = orignalNMS(boxes, iouThreshold);
@@ -181,8 +181,9 @@ int main(int argc, char** argv) {
         outFile.close();
     }
 
-    std::cout << method << " process time is " << (double)(sumTime) / 1000
-              << " ms" << std::endl;
+    std::cout << method << " average latency is " << std::fixed
+              << std::setprecision(3) << (double)(sumTime) / total_images
+              << " microseconds" << std::endl;
 
     double ap50 = 0, ap75 = 0, ap5095 = 0;
     for (uint32_t i = 0; i < 10; i++) {

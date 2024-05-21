@@ -9,6 +9,8 @@
 │   │   └── ...
 │   └── yolo-series
 │       ├── v5l-preds
+│   │   │   ├── 000000000139.csv
+│   │   │   └── ...
 │       └── ...
 └── open-images
     ├── labels
@@ -46,9 +48,9 @@ python run.py --preds ./my_preds/ --labels ./my_labels/ --output ./my_results/ -
 
 ## Outputs
 ```txt
-BOENMS process time is 551.757 ms
+BOENMS average latency is 113.608 microseconds
 mAP 50:95    = 0.502
 mAP 50       = 0.669
 mAP 75       = 0.546
 ```
-The total process time is given in milliseconds with COCO-style mAP. 
+The average latency is given in microseconds with COCO-style mAP. 
