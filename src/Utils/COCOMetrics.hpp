@@ -1,24 +1,23 @@
-#pragma once 
+#pragma once
 
 #include <map>
 #include <vector>
 
-template<class T>
+template <class T>
 class COCOMetrics {
-  public:
+   public:
     T ap;
     std::map<uint32_t, uint32_t> id;
     std::vector<uint32_t> gts;
     std::vector<std::vector<std::pair<T, T>>> rps;
     std::vector<std::vector<std::pair<T, char>>> tfs;
 
-
-    COCOMetrics() :
-        ap(0), 
-        id(std::map<uint32_t, uint32_t>()),
-        gts(std::vector<uint32_t>()),
-        rps(std::vector<std::vector<std::pair<T, T>>>()), 
-        tfs(std::vector<std::vector<std::pair<T, char>>>()) {}
+    COCOMetrics()
+        : ap(0),
+          id(std::map<uint32_t, uint32_t>()),
+          gts(std::vector<uint32_t>()),
+          rps(std::vector<std::vector<std::pair<T, T>>>()),
+          tfs(std::vector<std::vector<std::pair<T, char>>>()) {}
     ~COCOMetrics() {}
 
     uint32_t get_id(uint32_t category_id) {
@@ -41,9 +40,7 @@ class COCOMetrics {
         tfs[i].emplace_back(-score, tf);
     }
 
-    void insert_rp(uint32_t i, T r, T p) {
-        rps[i].emplace_back(r, p);
-    }
+    void insert_rp(uint32_t i, T r, T p) { rps[i].emplace_back(r, p); }
 
     void finalize() {
         uint32_t nc = id.size();

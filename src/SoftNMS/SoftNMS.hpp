@@ -8,24 +8,25 @@
 
 #include "../Utils/NMS.hpp"
 
-template<class S>
+template <class S>
 S fLinear(S iou) {
     return (S)(1) - iou;
 }
 
-template<class S>
+template <class S>
 S fGaussian(S iou, S sigma) {
     return exp(-iou * iou / sigma);
 }
 
 template <class T, class M, class S>
-auto softNMS(const std::vector<Box<T, M, S>>& boxes, const S& iouThreshold, double sigma, double min_score = 0.1, int method = 1)
-    -> std::vector<std::uint32_t> {
+auto softNMS(const std::vector<Box<T, M, S>>& boxes, const S& iouThreshold,
+             double sigma, double min_score = 0.1,
+             int method = 1) -> std::vector<uint32_t> {
     auto size = std::size(boxes);
 
     if ((int)size == 0) {
         // empty case
-        return std::vector<std::uint32_t>{};
+        return std::vector<uint32_t>{};
     }
 
     /*

@@ -4,19 +4,19 @@
 #include <cinttypes>
 #include <cmath>
 #include <cstdint>
-#include <vector>
 #include <tuple>
+#include <vector>
 
 #include "../Utils/NMS.hpp"
 
 template <class T, class M, class S>
-auto bobNMS(const std::vector<Box<T, M, S>>& boxes, const S& iouThreshold)
-    -> std::vector<std::uint32_t> {
+auto boeNMS(const std::vector<Box<T, M, S>>& boxes,
+            const S& iouThreshold) -> std::vector<uint32_t> {
     auto size = std::size(boxes);
 
     if ((int)size == 0) {
         // empty case
-        return std::vector<std::uint32_t>{};
+        return std::vector<uint32_t>{};
     }
 
     /*
@@ -35,7 +35,8 @@ auto bobNMS(const std::vector<Box<T, M, S>>& boxes, const S& iouThreshold)
         perm[i] = std::make_pair(dets[i].getMidPoint(), i);
     }
 
-    auto cmp = [] (std::pair<Point<M>, uint32_t> x, std::pair<Point<M>, uint32_t> y) -> bool {
+    auto cmp = [](std::pair<Point<M>, uint32_t> x,
+                  std::pair<Point<M>, uint32_t> y) -> bool {
         if (x.first < y.first) return true;
         if (y.first < x.first) return false;
         return x.second < y.second;
@@ -49,8 +50,12 @@ auto bobNMS(const std::vector<Box<T, M, S>>& boxes, const S& iouThreshold)
         keep.emplace_back(dets[i].id);
 
         auto rect = dets[i].rect;
-        uint32_t st = std::lower_bound(perm.begin(), perm.end(), std::make_pair(rect.lt, 0), cmp) - perm.begin();
-        uint32_t ed = std::upper_bound(perm.begin(), perm.end(), std::make_pair(rect.rb, 0), cmp) - perm.begin();
+        uint32_t st = std::lower_bound(perm.begin(), perm.end(),
+                                       std::make_pair(rect.lt, 0), cmp) -
+                      perm.begin();
+        uint32_t ed = std::upper_bound(perm.begin(), perm.end(),
+                                       std::make_pair(rect.rb, 0), cmp) -
+                      perm.begin();
         st = std::max<uint32_t>(st, 0);
         ed = std::min<uint32_t>(ed, size);
         // std::cerr << st << ", " << ed << std::endl;

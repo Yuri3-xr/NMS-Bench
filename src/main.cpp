@@ -8,23 +8,20 @@
 #include <iostream>
 #include <vector>
 
-#include "./AliceNMS/AliceNMS.hpp"
-#include "./AliceNMS/UltraAliceNMS.hpp"
-#include "./BobNMS/BobNMS.hpp"
+#include "./BOENMS/BOENMS.hpp"
 #include "./ClusterNMS/ClusterNMS.hpp"
-#include "./DNMS/DNMS.hpp"
 #include "./FastNMS/FastNMS.hpp"
 #include "./FastNMS/FastNMS_Par.hpp"
-#include "./FasterNMS/CoverTree.hpp"
-#include "./FasterNMS/FasterNMS.hpp"
-#include "./GreedyNMS/GreedyNMS.hpp"
+#include "./OrignalNMS/OrignalNMS.hpp"
+#include "./QSINMS/QSINMS.hpp"
+#include "./QSINMS/eQSINMS.hpp"
 #include "./SoftNMS/SoftNMS.hpp"
 #include "./Utils/COCOMetrics.hpp"
 #include "./Utils/Data.hpp"
 #include "./Utils/utils.hpp"
 
 // std::vector<Box<double, double, double>> boxes;
-std::vector<std::uint32_t> keep;
+std::vector<uint32_t> keep;
 
 constexpr double iouThreshold = 0.7;
 constexpr uint32_t maxDets = 100;
@@ -118,24 +115,20 @@ int main(int argc, char** argv) {
         // break;
 
         timer.reset();
-        if (method == "GreedyNMS") {
-            keep = greedyNMS(boxes, iouThreshold);
+        if (method == "OrignalNMS") {
+            keep = orignalNMS(boxes, iouThreshold);
         } else if (method == "FastNMS") {
             keep = fastNMS(boxes, iouThreshold);
         } else if (method == "FastNMS_Par") {
             keep = fastNMS_Par(boxes, iouThreshold);
-        } else if (method == "FasterNMS") {
-            keep = fasterNMS(boxes, iouThreshold);
-        } else if (method == "DNMS") {
-            keep = dNMS(boxes, iouThreshold);
         } else if (method == "SoftNMS") {
             keep = softNMS(boxes, iouThreshold, 0.5, 0.08, 1);
-        } else if (method == "BobNMS") {
-            keep = bobNMS(boxes, iouThreshold);
-        } else if (method == "AliceNMS") {
-            keep = aliceNMS(boxes, iouThreshold);
-        } else if (method == "UltraAliceNMS") {
-            keep = ultraAliceNMS(boxes, iouThreshold);
+        } else if (method == "BOENMS") {
+            keep = boeNMS(boxes, iouThreshold);
+        } else if (method == "QSINMS") {
+            keep = qsiNMS(boxes, iouThreshold);
+        } else if (method == "eQSINMS") {
+            keep = eqsiNMS(boxes, iouThreshold);
         } else if (method == "ClusterNMS") {
             keep = clusterNMS(boxes, iouThreshold);
         } else {

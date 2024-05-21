@@ -3,6 +3,7 @@
 #include <cinttypes>
 #include <cstdint>
 #include <iostream>
+#include <limits>
 #include <tuple>
 
 template <class T>
@@ -102,7 +103,7 @@ class Box {
     Box() { score = 0; }
     Rect<T, M> rect;
     S score;
-    uint32_t id = -1;
+    uint32_t id = std::numeric_limits<uint32_t>::max();
     constexpr Box(Rect<T, M> _rect, S _score, uint32_t _id)
         : rect(_rect), score(_score), id(_id){};
 

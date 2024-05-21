@@ -4,19 +4,19 @@
 #include <cinttypes>
 #include <cmath>
 #include <cstdint>
-#include <vector>
 #include <stack>
+#include <vector>
 
 #include "../Utils/NMS.hpp"
 
 template <class T, class M, class S>
-auto ultraAliceNMS(const std::vector<Box<T, M, S>>& boxes, const S& iouThreshold)
-    -> std::vector<std::uint32_t> {
+auto eqsiNMS(const std::vector<Box<T, M, S>> &boxes,
+             const S &iouThreshold) -> std::vector<uint32_t> {
     auto size = std::size(boxes);
 
     if ((int)size == 0) {
         // empty case
-        return std::vector<std::uint32_t>{};
+        return std::vector<uint32_t>{};
     }
 
     /*
@@ -24,10 +24,10 @@ auto ultraAliceNMS(const std::vector<Box<T, M, S>>& boxes, const S& iouThreshold
     */
 
     auto dets = boxes;
-    std::sort(std::begin(dets), std::end(dets), [&] (const auto &x, const auto &y) {
-        return x.getMidPoint() < y.getMidPoint();
-    });
-
+    std::sort(std::begin(dets), std::end(dets),
+              [&](const auto &x, const auto &y) {
+                  return x.getMidPoint() < y.getMidPoint();
+              });
 
     std::vector<uint32_t> keep;  // Boxes which need to be keeped
     std::vector<int> dp(size, 1);
