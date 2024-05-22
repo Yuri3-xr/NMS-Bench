@@ -115,6 +115,8 @@ int main(int argc, char** argv) {
         // break;
         total_images += 1;
         timer.reset();
+
+        sum_iou = 0;
         if (method == "OrignalNMS") {
             keep = orignalNMS(boxes, iouThreshold);
         } else if (method == "FastNMS") {
@@ -135,7 +137,7 @@ int main(int argc, char** argv) {
             std::cerr << "No such method!" << std::endl;
             exit(-1);
         }
-
+        // std::cout << (int)boxes.size() << " " << sum_iou << '\n';
         sumTime += timer.elapsed();
 
         auto gt_category_id = data.label_category_id();
@@ -181,6 +183,7 @@ int main(int argc, char** argv) {
         outFile.close();
     }
 
+    // return 0;
     std::cout << method << " average latency is " << std::fixed
               << std::setprecision(3) << (double)(sumTime) / total_images
               << " microseconds" << std::endl;

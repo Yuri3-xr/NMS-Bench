@@ -6,6 +6,7 @@
 #include <limits>
 #include <tuple>
 
+static int sum_iou = 0;
 template <class T>
 class Point {
    public:
@@ -128,7 +129,7 @@ class Box {
         auto inter = Rect<T, M>(inter1, inter2).area();
         auto area1 = this->rect.area();
         auto area2 = other.rect.area();
-
+        sum_iou += 1;
         return static_cast<S>(inter) / (area1 + area2 - inter);
     }
 

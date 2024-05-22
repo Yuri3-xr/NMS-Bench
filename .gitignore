@@ -46,3 +46,7 @@ data
 count.py
 
 exp.py
+
+*
+*.hpp
+main.cpp
