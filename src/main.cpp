@@ -8,23 +8,22 @@
 #include <iostream>
 #include <vector>
 
-#include "./AliceNMS/AliceNMS.hpp"
-#include "./AliceNMS/UltraAliceNMS.hpp"
-#include "./BobNMS/BobNMS.hpp"
+#include "./BOENMS/BOENMS.hpp"
+#include "./BOENMS/DPBOENMS.hpp"
 #include "./ClusterNMS/ClusterNMS.hpp"
-#include "./DNMS/DNMS.hpp"
 #include "./FastNMS/FastNMS.hpp"
 #include "./FastNMS/FastNMS_Par.hpp"
-#include "./FasterNMS/CoverTree.hpp"
-#include "./FasterNMS/FasterNMS.hpp"
-#include "./GreedyNMS/GreedyNMS.hpp"
+#include "./OrignalNMS/OrignalNMS.hpp"
+#include "./QSINMS/QSINMS.hpp"
+#include "./QSINMS/eQSINMS.hpp"
 #include "./SoftNMS/SoftNMS.hpp"
+#include "./PSRR-MaxpoolNMS/PSRR-MaxpoolNMS.hpp"
 #include "./Utils/COCOMetrics.hpp"
 #include "./Utils/Data.hpp"
 #include "./Utils/utils.hpp"
 
 // std::vector<Box<double, double, double>> boxes;
-std::vector<std::uint32_t> keep;
+std::vector<uint32_t> keep;
 
 constexpr double iouThreshold = 0.7;
 constexpr uint32_t maxDets = 100;
@@ -76,7 +75,8 @@ int main(int argc, char** argv) {
     std::filesystem::directory_iterator inList(inPredPath);
 
     int cnt = 0;
-
+    int total_images = 0;
+    int total_boxes = 0;
     std::vector<COCOMetrics<double>> coco_metrics(10);
 
     for (const auto& file : inList) {
@@ -108,6 +108,10 @@ int main(int argc, char** argv) {
         data.input(inPredFile, inLabelFile);
 
         auto boxes = data.pred_boxes();
+        auto _boxes = data.pred_boxes(false);
+        auto categories = data.pred_categories();
+
+        // if ((int)boxes.size() <= 6000 || (int)boxes.size() > 7000) continue;
 
         // for (auto box : boxes) {
         //     std::cout << data.img_id << " ";
@@ -116,33 +120,38 @@ int main(int argc, char** argv) {
         // }
 
         // break;
-
+        total_boxes += boxes.size();
+        total_images += 1;
         timer.reset();
-        if (method == "GreedyNMS") {
-            keep = greedyNMS(boxes, iouThreshold);
+
+        sum_iou = 0;
+        if (method == "OrignalNMS") {
+            keep = orignalNMS(boxes, iouThreshold);
         } else if (method == "FastNMS") {
             keep = fastNMS(boxes, iouThreshold);
         } else if (method == "FastNMS_Par") {
             keep = fastNMS_Par(boxes, iouThreshold);
-        } else if (method == "FasterNMS") {
-            keep = fasterNMS(boxes, iouThreshold);
-        } else if (method == "DNMS") {
-            keep = dNMS(boxes, iouThreshold);
         } else if (method == "SoftNMS") {
             keep = softNMS(boxes, iouThreshold, 0.5, 0.08, 1);
-        } else if (method == "BobNMS") {
-            keep = bobNMS(boxes, iouThreshold);
-        } else if (method == "AliceNMS") {
-            keep = aliceNMS(boxes, iouThreshold);
-        } else if (method == "UltraAliceNMS") {
-            keep = ultraAliceNMS(boxes, iouThreshold);
+        } else if (method == "BOENMS") {
+            keep = boeNMS(boxes, iouThreshold);
+        } else if (method == "QSINMS") {
+            keep = qsiNMS(boxes, iouThreshold);
+        } else if (method == "eQSINMS") {
+            keep = eqsiNMS(boxes, iouThreshold);
         } else if (method == "ClusterNMS") {
             keep = clusterNMS(boxes, iouThreshold);
+        } else if (method == "PSRR-MaxpoolNMS") {
+            std::vector<int> anchors = {64 * 64, 128 * 128, 256 * 256, 512 * 512};
+            std::vector<double> ratios = {0.5, 1, 2};
+            keep = PSRRNMS(_boxes, categories, anchors, ratios);
+        } else if (method == "DPBOENMS") {
+            keep = dpboeNMS(boxes, iouThreshold);
         } else {
             std::cerr << "No such method!" << std::endl;
             exit(-1);
         }
-
+        // std::cout << (int)boxes.size() << " " << sum_iou << '\n';
         sumTime += timer.elapsed();
 
         auto gt_category_id = data.label_category_id();
@@ -188,8 +197,10 @@ int main(int argc, char** argv) {
         outFile.close();
     }
 
-    std::cout << method << " process time is " << (double)(sumTime) / 1000
-              << " ms" << std::endl;
+    // return 0;
+    std::cout << method << " average latency is " << std::fixed
+              << std::setprecision(3) << (double)(sumTime) / total_images
+              << " microseconds" << std::endl;
 
     double ap50 = 0, ap75 = 0, ap5095 = 0;
     for (uint32_t i = 0; i < 10; i++) {
@@ -208,6 +219,7 @@ int main(int argc, char** argv) {
     std::cout << std::setprecision(3) << " = " << ap50 << std::endl;
     std::cout << std::left << std::setw(12) << "mAP 75 ";
     std::cout << std::setprecision(3) << " = " << ap75 << std::endl;
+    std::cout << std::setprecision(3) << "size of boxes: " << total_boxes << "/" << total_images << " = " << 1.0 * total_boxes / total_images << std::endl;
 
     // std::cerr << cnt << std::endl;
     return 0;
