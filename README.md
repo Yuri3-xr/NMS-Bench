@@ -35,11 +35,22 @@ File structure of NMS-Bench:
 
 You can download data from [link](http://url). You can also generate the data yourself, but please ensure that the filenames of the model output match the filenames of the labels.
 
+## Requirements
+
+- GCC >= 9
+- Python 3.X.X
+
 ## Compilation
-Make sure that ``GCC >= 9.0``.
+
+Run:
+
 ```shell
 make clean && make
 ```
+
+In some methods, we use execution policies (std::execution::par, std::execution::unseq, std::execution::par_unseq) to support parallelism, such as Fast NMS and Cluster-NMS. On some platforms (like macOS with Clang and libc++), these execution policies may not be fully implemented or supported without additional setup. 
+
+We recommend using GCC and executing on x86_64.
 
 ## Runing in Command Line
 
