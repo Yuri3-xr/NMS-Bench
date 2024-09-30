@@ -33,7 +33,7 @@ File structure of NMS-Bench:
         └── yolo-series
 ```
 
-You can download data from [link](http://url). You can also generate the data yourself, but please ensure that the filenames of the model output match the filenames of the labels.
+You can download data from [here](https://drive.google.com/file/d/1oSRNNWTv2QP3PwKkZH9z-cxcLMXdlmL4/view?usp=sharing). You can also generate the data yourself, but please ensure that the filenames of the model output match the filenames of the labels.
 
 ## Requirements
 
