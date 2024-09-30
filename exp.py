@@ -1,8 +1,7 @@
 import subprocess
 import re
-# methods = ['GreedyNMS', 'BobNMS', 'AliceNMS', 'UltraAliceNMS', "FastNMS_Par", "ClusterNMS"]
+methods = ['OrignalNMS', 'BOENMS', 'QSINMS', 'eQSINMS', "FastNMS_Par", "ClusterNMS"]
 
-methods = ['AliceNMS', 'UltraAliceNMS']
 # sizes = ['R50-FPN', 'R101-FPN', 'X101-FPN']
 
 # results = {}
@@ -132,8 +131,8 @@ for method in methods:
                 avg_process_time += float(process_time.group(1))
                 avg_map_50_95 += float(map_50_95.group(1))
         
-        avg_process_time /= 3
-        avg_map_50_95 /= 3
+        avg_process_time /= 1
+        avg_map_50_95 /= 1
         print(method, size, avg_process_time, avg_map_50_95)
         results[f"{size}-{method}"] = (avg_process_time, avg_map_50_95)
 

@@ -1,12 +1,12 @@
 #pragma once
 
-#include <fstream>
-#include <sstream>
-#include <iostream>
-#include <string>
-#include <iomanip>
-#include <vector>
 #include <chrono>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
 
 #include "./NMS.hpp"
 

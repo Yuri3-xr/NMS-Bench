@@ -6,7 +6,8 @@ def main():
     parser.add_argument('--preds', default='./data/coco/yolo-series/v8m-preds/', type=str, help='the path of preds')
     parser.add_argument('--labels', default='./data/coco/labels/', type=str, help='the path of labels')
     parser.add_argument('--output', default='./results/', type=str, help='the path of output')
-    parser.add_argument('--method', default='BobNMS', type=str, help='the name of NMS algorithm')
+    parser.add_argument('--method', default='BOENMS', type=str, help='the name of NMS algorithm include(OrignalNMS FastNMS FastNMS_Par SoftNMS BOENMS QSINMS eQSINMS ClusterNMS)')
+
     args = parser.parse_args()
     
     input_pred_file = args.preds

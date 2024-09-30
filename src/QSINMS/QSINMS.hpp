@@ -1,27 +1,20 @@
 #pragma once
 
+#include <limits.h>
+
 #include <algorithm>
 #include <cinttypes>
 #include <cmath>
 #include <cstdint>
-#include <vector>
-#include <random>
 #include <cstdio>
-#include <limits.h>
+#include <random>
+#include <vector>
 
 #include "../Utils/NMS.hpp"
 
-int rd(int L, int R) {
-        static std::mt19937 rnd(time(0));
-        int res = (int)((1.0 * rnd() / UINT_MAX) * (R - L)) + L;
-        return res;
-}
-
 template <class T, class M, class S>
-int partition(std::vector<Box<T, M, S>> &boxes, 
-    int low, int high, 
-    const S &iouThreshold) {
-    
+int partition(std::vector<Box<T, M, S>> &boxes, int low, int high,
+              const S &iouThreshold) {
     int p = low;
     for (int j = low; j < high; j++) {
         if (boxes[j].score > boxes[p].score) {
@@ -34,8 +27,9 @@ int partition(std::vector<Box<T, M, S>> &boxes,
     int i = low;
     for (int j = low; j < high - 1; j++) {
         if (boxes[j].getMidPoint() < pivot.getMidPoint()) {
-        // if (boxes[j].score > pivot.score) {
-        // if (boxes[j].getMidPoint().x + boxes[j].getMidPoint().y < pivot.getMidPoint().x + pivot.getMidPoint().y) {
+            // if (boxes[j].score > pivot.score) {
+            // if (boxes[j].getMidPoint().x + boxes[j].getMidPoint().y <
+            // pivot.getMidPoint().x + pivot.getMidPoint().y) {
             std::swap(boxes[i], boxes[j]);
             i++;
         }
@@ -46,12 +40,9 @@ int partition(std::vector<Box<T, M, S>> &boxes,
 }
 
 template <class T, class M, class S>
-void quickSort(std::vector<Box<T, M, S>> &boxes, 
-    int low, int high, 
-    std::vector<int> &dp, 
-    std::vector<uint32_t> &keep, 
-    const S &iouThreshold) {
-    
+void quickSort(std::vector<Box<T, M, S>> &boxes, int low, int high,
+               std::vector<int> &dp, std::vector<uint32_t> &keep,
+               const S &iouThreshold) {
     if (low >= high) return;
 
     // std::cerr << low << ", " << high << std::endl;
@@ -72,17 +63,16 @@ void quickSort(std::vector<Box<T, M, S>> &boxes,
 
     quickSort<T, M, S>(boxes, low, p, dp, keep, iouThreshold);
     quickSort<T, M, S>(boxes, p + 1, high, dp, keep, iouThreshold);
-
 }
 
 template <class T, class M, class S>
-auto aliceNMS(const std::vector<Box<T, M, S>>& boxes, const S& iouThreshold)
-    -> std::vector<std::uint32_t> {
+auto qsiNMS(const std::vector<Box<T, M, S>> &boxes,
+            const S &iouThreshold) -> std::vector<uint32_t> {
     auto size = std::size(boxes);
 
     if ((int)size == 0) {
         // empty case
-        return std::vector<std::uint32_t>{};
+        return std::vector<uint32_t>{};
     }
 
     /*

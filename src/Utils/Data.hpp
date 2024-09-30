@@ -1,18 +1,18 @@
 #pragma once
 
 #include <cinttypes>
-#include <fstream>
-#include <sstream>
 #include <cstdint>
-#include <vector>
+#include <fstream>
 #include <set>
+#include <sstream>
+#include <vector>
 
 #include "./NMS.hpp"
 #include "./utils.hpp"
 
 template <class T, class M, class S>
 class BBox {
-  public:
+   public:
     uint32_t category_id;
     Box<T, M, S> box;
     BBox(uint32_t _category_id, Box<T, M, S> _box)
@@ -28,33 +28,27 @@ class BBox {
 
 template <class T, class M, class S>
 class Data {
-  public:
+   public:
     // std::string img_id;
     std::vector<BBox<T, M, S>> preds;
     std::vector<BBox<T, M, S>> labels;
     std::set<uint32_t> vis_labels;
-    Data() 
-        :  
-        preds(std::vector<BBox<T, M, S>>()), 
-        labels(std::vector<BBox<T, M, S>>()), 
-        vis_labels(std::set<uint32_t>()) 
-        {}
+    Data()
+        : preds(std::vector<BBox<T, M, S>>()),
+          labels(std::vector<BBox<T, M, S>>()),
+          vis_labels(std::set<uint32_t>()) {}
     ~Data() {}
 
     // void set_img_id(std::string _img_id) {
     //     img_id = _img_id;
     // }
 
-    void add_pred(BBox<T, M, S> pred) {
-        preds.emplace_back(pred);
-    }
+    void add_pred(BBox<T, M, S> pred) { preds.emplace_back(pred); }
 
-    void add_label(BBox<T, M, S> label) {
-        labels.emplace_back(label);
-    }
+    void add_label(BBox<T, M, S> label) { labels.emplace_back(label); }
 
-    void input(std::fstream& inPredFile, std::fstream& inLabelFile) {
-        std::string _img_id; 
+    void input(std::fstream &inPredFile, std::fstream &inLabelFile) {
+        std::string _img_id;
         uint32_t _categoriy_id;
         T ltx, lty, rbx, rby, w, h;
         S score;
@@ -64,32 +58,29 @@ class Data {
         std::string buf;
         std::stringstream ss;
 
-        inPredFile >> buf; // ignore header
+        inPredFile >> buf;  // ignore header
         while (inPredFile >> buf) {
             string_split(ss, buf, ',');
-            ss >> _img_id
-                >> _categoriy_id
-                >> ltx >> lty >> w >> h >> score;
+            ss >> _img_id >> _categoriy_id >> ltx >> lty >> w >> h >> score;
             rbx = ltx + w, rby = lty + h;
-            // std::cerr << _img_id << " " << _categoriy_id 
-                // << " " << ltx << " " << lty << " " << w << " " << h << std::endl;
-            auto box = Box<T, M, S>(Rect<T, M>(Point<T>(ltx, lty), Point<T>(rbx, rby)),
-                           score, p);
+            // std::cerr << _img_id << " " << _categoriy_id
+            // << " " << ltx << " " << lty << " " << w << " " << h << std::endl;
+            auto box = Box<T, M, S>(
+                Rect<T, M>(Point<T>(ltx, lty), Point<T>(rbx, rby)), score, p);
             preds.emplace_back(_categoriy_id, box);
             p++;
             ss.clear();
         }
 
-        inLabelFile >> buf; // ignore header
+        inLabelFile >> buf;  // ignore header
         p = 0;
         while (inLabelFile >> buf) {
             string_split(ss, buf, ',');
-            ss >> _img_id
-                >> _categoriy_id
-                >> ltx >> lty >> w >> h >> iscrowd;
+            ss >> _img_id >> _categoriy_id >> ltx >> lty >> w >> h >> iscrowd;
             rbx = ltx + w, rby = lty + h;
-            auto box = Box<T, M, S>(Rect<T, M>(Point<T>(ltx, lty), Point<T>(rbx, rby)),
-                           (T)(1 - iscrowd), p);
+            auto box =
+                Box<T, M, S>(Rect<T, M>(Point<T>(ltx, lty), Point<T>(rbx, rby)),
+                             (T)(1 - iscrowd), p);
             labels.emplace_back(_categoriy_id, box);
             p++;
             ss.clear();
@@ -97,7 +88,8 @@ class Data {
         std::sort(labels.begin(), labels.end());
     }
 
-    std::vector<Box<T, M, S>> pred_boxes(bool batched_nms = true, uint32_t max_wh = 7680) {
+    std::vector<Box<T, M, S>> pred_boxes(bool batched_nms = true,
+                                         uint32_t max_wh = 7680) {
         std::vector<Box<T, M, S>> boxes;
         for (auto &pred : preds) {
             auto box = pred.box;
@@ -143,9 +135,10 @@ class Data {
                 T ga = box.rect.area();
                 now_iou *= (da + ga - now_iou) / da;
             }
-            if (m != -1 && labels[m].box.score > 0.5 && box.score < 0.5) break; // if matches and not crowd while get a crowd label 
+            if (m != -1 && labels[m].box.score > 0.5 && box.score < 0.5)
+                break;  // if matches and not crowd while get a crowd label
             if (now_iou < iou) continue;
-            iou = now_iou; // find the best iou
+            iou = now_iou;  // find the best iou
             m = i;
         }
         if (m == -1) {
@@ -159,9 +152,7 @@ class Data {
                 return {pred_category_id, pred_box.score, 1};
             }
         }
-    }   
-
-    void reset_vis_labels() {
-        vis_labels.clear();
     }
+
+    void reset_vis_labels() { vis_labels.clear(); }
 };

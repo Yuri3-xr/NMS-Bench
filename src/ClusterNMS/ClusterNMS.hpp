@@ -13,12 +13,12 @@
 
 template <class T, class M, class S>
 auto clusterNMS(const std::vector<Box<T, M, S>>& boxes,
-                const S& iouThreshold) -> std::vector<std::uint32_t> {
+                const S& iouThreshold) -> std::vector<uint32_t> {
     auto size = std::size(boxes);
 
     if ((int)size == 0) {
         // empty case
-        return std::vector<std::uint32_t>{};
+        return std::vector<uint32_t>{};
     }
 
     auto dets = boxes;

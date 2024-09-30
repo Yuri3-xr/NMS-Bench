@@ -9,7 +9,6 @@
 #include <vector>
 
 #include "./BOENMS/BOENMS.hpp"
-#include "./BOENMS/DPBOENMS.hpp"
 #include "./ClusterNMS/ClusterNMS.hpp"
 #include "./FastNMS/FastNMS.hpp"
 #include "./FastNMS/FastNMS_Par.hpp"
@@ -77,6 +76,7 @@ int main(int argc, char** argv) {
     int cnt = 0;
     int total_images = 0;
     int total_boxes = 0;
+
     std::vector<COCOMetrics<double>> coco_metrics(10);
 
     for (const auto& file : inList) {
@@ -111,20 +111,10 @@ int main(int argc, char** argv) {
         auto _boxes = data.pred_boxes(false);
         auto categories = data.pred_categories();
 
-        // if ((int)boxes.size() <= 6000 || (int)boxes.size() > 7000) continue;
-
-        // for (auto box : boxes) {
-        //     std::cout << data.img_id << " ";
-        //     std::cout << box.rect.lt << " " << box.rect.rb << " " <<
-        //     box.score << std::endl;
-        // }
-
-        // break;
         total_boxes += boxes.size();
         total_images += 1;
         timer.reset();
 
-        sum_iou = 0;
         if (method == "OrignalNMS") {
             keep = orignalNMS(boxes, iouThreshold);
         } else if (method == "FastNMS") {
@@ -151,7 +141,7 @@ int main(int argc, char** argv) {
             std::cerr << "No such method!" << std::endl;
             exit(-1);
         }
-        // std::cout << (int)boxes.size() << " " << sum_iou << '\n';
+
         sumTime += timer.elapsed();
 
         auto gt_category_id = data.label_category_id();
@@ -196,8 +186,7 @@ int main(int argc, char** argv) {
         inLabelFile.close();
         outFile.close();
     }
-
-    // return 0;
+  
     std::cout << method << " average latency is " << std::fixed
               << std::setprecision(3) << (double)(sumTime) / total_images
               << " microseconds" << std::endl;
