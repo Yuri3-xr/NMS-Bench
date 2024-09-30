@@ -14,7 +14,6 @@ File structure of NMS-Bench:
 ├── LICENSE
 ├── Makefile
 ├── README.md
-├── exp.py
 ├── run.py
 ├── src
 │   └── ...
