@@ -135,8 +135,6 @@ int main(int argc, char** argv) {
             std::vector<int> anchors = {64 * 64, 128 * 128, 256 * 256, 512 * 512};
             std::vector<double> ratios = {0.5, 1, 2};
             keep = PSRRNMS(_boxes, categories, anchors, ratios);
-        } else if (method == "DPBOENMS") {
-            keep = dpboeNMS(boxes, iouThreshold);
         } else {
             std::cerr << "No such method!" << std::endl;
             exit(-1);
@@ -208,7 +206,7 @@ int main(int argc, char** argv) {
     std::cout << std::setprecision(3) << " = " << ap50 << std::endl;
     std::cout << std::left << std::setw(12) << "mAP 75 ";
     std::cout << std::setprecision(3) << " = " << ap75 << std::endl;
-    std::cout << std::setprecision(3) << "size of boxes: " << total_boxes << "/" << total_images << " = " << 1.0 * total_boxes / total_images << std::endl;
+    // std::cout << std::setprecision(3) << "average number of boxes: " << total_boxes << "/" << total_images << " = " << 1.0 * total_boxes / total_images << std::endl;
 
     // std::cerr << cnt << std::endl;
     return 0;

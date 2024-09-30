@@ -63,8 +63,6 @@ class Data {
             string_split(ss, buf, ',');
             ss >> _img_id >> _categoriy_id >> ltx >> lty >> w >> h >> score;
             rbx = ltx + w, rby = lty + h;
-            // std::cerr << _img_id << " " << _categoriy_id
-            // << " " << ltx << " " << lty << " " << w << " " << h << std::endl;
             auto box = Box<T, M, S>(
                 Rect<T, M>(Point<T>(ltx, lty), Point<T>(rbx, rby)), score, p);
             preds.emplace_back(_categoriy_id, box);
@@ -101,6 +99,15 @@ class Data {
             boxes.emplace_back(box);
         }
         return boxes;
+    }
+
+    std::vector<uint32_t> pred_categories() {
+        std::vector<uint32_t> categories;
+        for (auto &pred : preds) {
+            auto category_id = pred.category_id;
+            categories.emplace_back(category_id);
+        }
+        return categories;
     }
 
     std::vector<int32_t> label_category_id() {
