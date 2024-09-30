@@ -16,6 +16,7 @@
 #include "./QSINMS/QSINMS.hpp"
 #include "./QSINMS/eQSINMS.hpp"
 #include "./SoftNMS/SoftNMS.hpp"
+#include "./PSRR-MaxpoolNMS/PSRR-MaxpoolNMS.hpp"
 #include "./Utils/COCOMetrics.hpp"
 #include "./Utils/Data.hpp"
 #include "./Utils/utils.hpp"
@@ -74,6 +75,8 @@ int main(int argc, char** argv) {
 
     int cnt = 0;
     int total_images = 0;
+    int total_boxes = 0;
+
     std::vector<COCOMetrics<double>> coco_metrics(10);
 
     for (const auto& file : inList) {
@@ -105,16 +108,13 @@ int main(int argc, char** argv) {
         data.input(inPredFile, inLabelFile);
 
         auto boxes = data.pred_boxes();
+        auto _boxes = data.pred_boxes(false);
+        auto categories = data.pred_categories();
 
-        // for (auto box : boxes) {
-        //     std::cout << data.img_id << " ";
-        //     std::cout << box.rect.lt << " " << box.rect.rb << " " <<
-        //     box.score << std::endl;
-        // }
-
-        // break;
+        total_boxes += boxes.size();
         total_images += 1;
         timer.reset();
+
         if (method == "OrignalNMS") {
             keep = orignalNMS(boxes, iouThreshold);
         } else if (method == "FastNMS") {
@@ -131,6 +131,12 @@ int main(int argc, char** argv) {
             keep = eqsiNMS(boxes, iouThreshold);
         } else if (method == "ClusterNMS") {
             keep = clusterNMS(boxes, iouThreshold);
+        } else if (method == "PSRR-MaxpoolNMS") {
+            std::vector<int> anchors = {64 * 64, 128 * 128, 256 * 256, 512 * 512};
+            std::vector<double> ratios = {0.5, 1, 2};
+            keep = PSRRNMS(_boxes, categories, anchors, ratios);
+        } else if (method == "DPBOENMS") {
+            keep = dpboeNMS(boxes, iouThreshold);
         } else {
             std::cerr << "No such method!" << std::endl;
             exit(-1);
@@ -180,7 +186,7 @@ int main(int argc, char** argv) {
         inLabelFile.close();
         outFile.close();
     }
-
+  
     std::cout << method << " average latency is " << std::fixed
               << std::setprecision(3) << (double)(sumTime) / total_images
               << " microseconds" << std::endl;
@@ -202,6 +208,7 @@ int main(int argc, char** argv) {
     std::cout << std::setprecision(3) << " = " << ap50 << std::endl;
     std::cout << std::left << std::setw(12) << "mAP 75 ";
     std::cout << std::setprecision(3) << " = " << ap75 << std::endl;
+    std::cout << std::setprecision(3) << "size of boxes: " << total_boxes << "/" << total_images << " = " << 1.0 * total_boxes / total_images << std::endl;
 
     // std::cerr << cnt << std::endl;
     return 0;
