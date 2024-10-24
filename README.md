@@ -87,5 +87,10 @@ The average latency is given in microseconds with COCO-style mAP.
 ## Citation
 
 ```
-// TODO:
+@article{si2024accelerating,
+  title   = {Accelerating Non-Maximum Suppression: A Graph Theory Perspective},
+  author  = {Si, King-Siong and Sun, Lu and Zhang, Weizhan and Gong, Tieliang and Wang, Jiahao and Liu, Jiang and Sun, Hao},
+  journal = {arXiv preprint arXiv:2409.20520},
+  year    = {2024}
+}
 ```
