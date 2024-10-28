@@ -7,7 +7,6 @@ BUILDDIR := build
 OUTPUTDIR := build/app
 TARGET := $(OUTPUTDIR)/main
 
-
 SOURCES := $(wildcard $(SRCDIR)/*.cpp)
 OBJECTS := $(patsubst $(SRCDIR)/%.cpp,$(BUILDDIR)/%.o,$(SOURCES))
 
